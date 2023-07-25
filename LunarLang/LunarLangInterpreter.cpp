@@ -4,6 +4,8 @@
 #include "Token.h"
 #include "constant.h"
 #include "Output.h"
+#include "TokenList.h"
+#include "RValue.h"
 
 Result LunarLangInterpreter::interpret(const char* filename) {
     std::fstream file;
@@ -43,7 +45,17 @@ Result LunarLangInterpreter::executeTokens(const std::vector<Token>& tokens) {
             
         break;
     case Key::VARIABLE:
-            break;
+        if (tokens.size() < 3)
+            return Result::SYNTAXERROR;
+        if (tokens[1].getKey() != Key::ASSIGN)
+            return Result::SYNTAXERROR;
+        TokenList tokenList(tokens);
+        tokenList.cutFirst(2);
+        if (tokenList.isEmpty())
+            return Result::SYNTAXERROR;
+        
+        
+        break;
     default:
         return Result::SYNTAXERROR;
     }

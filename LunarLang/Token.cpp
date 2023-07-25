@@ -1,5 +1,16 @@
 #include "Token.h"
 
+Token::Token() {
+	key = Key::UNSET;
+	data = nullptr;
+	int dataLen = 0;
+}
+
+Token::Token(Variable variable) {
+	data = new Variable;
+
+}
+
 Token::Token(const char* dataStart, int size) {
 	dataLen = size;
 	data = new char[size+1];
@@ -63,9 +74,95 @@ const char* Token::getData() const {
 	return data;
 }
 
+
+
 int Token::getDataSize() const
 {
 	return dataLen;
+}
+
+bool Token::hasValue() const {
+	if (key == Key::STRCONSTANT or key == Key::INTCONSTANT or key == Key::VARIABLE)
+		return true;
+	return false;
+}
+
+bool Token::isBracket() const {
+	switch (key)
+	{
+	case Key::OPENBRACKET:
+		return true;
+		break;
+	case Key::CLOSEBRACKET:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+bool Token::isOpenBracket() const {
+	switch (key)
+	{
+	case Key::OPENBRACKET:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+bool Token::isArithmeticOperator() const {
+	switch (key)
+	{
+	case Key::ADD:
+		return true;
+		break;
+	case Key::SUBTRACT:
+		return true;
+		break;
+	case Key::MULTIPLY:
+		return true;
+		break;
+	case Key::DIVIDE:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+bool Token::isArtihmeticPointOperator() const {
+	switch (key)
+	{
+	case Key::MULTIPLY:
+		return true;
+		break;
+	case Key::DIVIDE:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+bool Token::isArtihmeticLineOperator() const {
+	switch (key)
+	{
+	case Key::ADD:
+		return true;
+		break;
+	case Key::SUBTRACT:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
 }
 
 bool Token::isAllLetters() {
@@ -104,7 +201,7 @@ Key Token::getKey() const {
 }
 
 
-Result fillTokenArray(const std::string& line, std::vector<Token>& tokenArray) {
+[[nodiscard]] Result fillTokenArray(const std::string& line, std::vector<Token>& tokenArray) {
 	const char* cLine = line.data();
 	int tokenStart = 0;
 	int i;

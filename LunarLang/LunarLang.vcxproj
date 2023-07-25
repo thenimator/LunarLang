@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -76,6 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,6 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,18 +132,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="defines.cpp" />
+    <ClCompile Include="RValue.cpp" />
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="LunarLangInterpreter.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TokenList.cpp" />
+    <ClCompile Include="TokenListElement.cpp" />
     <ClCompile Include="Variable.cpp" />
+    <ClCompile Include="VariableManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constant.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="operations.h" />
     <ClInclude Include="Output.h" />
+    <ClInclude Include="RValue.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="LunarLangInterpreter.h" />
+    <ClInclude Include="TokenList.h" />
+    <ClInclude Include="TokenListElement.h" />
     <ClInclude Include="Variable.h" />
+    <ClInclude Include="VariableManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
