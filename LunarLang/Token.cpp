@@ -1,96 +1,167 @@
 #include "Token.h"
+#include "Variable.h"
 
-Token::Token(const char* dataStart, int size) {
-	dataLen = size;
-	data = new char[size+1];
-	memcpy(data,dataStart,size);
-	data[size] = '\0';
+Token::Token() {
+
 }
 
-Token::Token(const Token& copyToken) {
-	key = copyToken.key;
-	dataLen = copyToken.dataLen;
-	data = new char[dataLen + 1];
-	memcpy(data, copyToken.data, dataLen + 1);
+Key Token::getKey() const {
+	return key;
 }
 
-Token::~Token() {
-	delete data;
-}
-
-Result Token::generateKey() {
-	if (dataLen == 1 and data[0] == '+') {
-		key = Key::ADD;
+Result Token::generateFromString(const char* pStringToken, uint32_t size) {
+	if (size == 0) 
+		return Result::IMPLEMENTATIONERROR;
+	
+	if (size == 1 and pStringToken[0] == '+') {
+		key = Key::OPERATOR;
+		pData = new Operator;
+		*(Operator*)pData = Operator::ADD;
 		return Result::SUCCESS;
 	}
-	if (dataLen == 1 and data[0] == '-') {
-		key = Key::SUBTRACT;
+	if (size == 1 and pStringToken[0] == '-') {
+		key = Key::OPERATOR;
+		pData = new Operator;
+		*(Operator*)pData = Operator::SUBTRACT;
 		return Result::SUCCESS;
 	}
-	if (dataLen == 1 and data[0] == '*') {
-		key = Key::MULTIPLY;
+	if (size == 1 and pStringToken[0] == '*') {
+		key = Key::OPERATOR;
+		pData = new Operator;
+		*(Operator*)pData = Operator::MULTIPLY;
 		return Result::SUCCESS;
 	}
-	if (dataLen == 1 and data[0] == '/') {
-		key = Key::DIVIDE;
+	if (size == 1 and pStringToken[0] == '/') {
+		key = Key::OPERATOR;
+		pData = new Operator;
+		*(Operator*)pData = Operator::DIVIDE;
 		return Result::SUCCESS;
 	}
-	if (dataLen == 1 and data[0] == '=') {
-		key = Key::ASSIGN;
+	if (size == 1 and pStringToken[0] == '=') {
+		key = Key::OPERATOR;
+		pData = new Operator;
+		*(Operator*)pData = Operator::DIVIDE;
 		return Result::SUCCESS;
 	}
-	if (strcmp(data,"out") == 0) {
-		key = Key::OUTPUT;
-		return Result::SUCCESS;
+	if (size == 3) {
+		if (pStringToken[0] == 'o' and pStringToken[1] == 'u' and pStringToken[2] == 't') {
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::OUTPUT;
+			return Result::SUCCESS;
+		}
 	}
-	if (isAllLetters()) {
+	//Working until this point
+	if (isNumber(pStringToken, size)) {
 		key = Key::VARIABLE;
+		int64_t mult = 1;
+		int64_t result = 0;
+		for (uint32_t i = 0; i < (size-1); i++) {
+			result += pStringToken[size - 1 - i]*mult;
+			mult *= 10;
+		}
+		if (pStringToken[0] == '-') {
+			result *= -11;
+		}
+		else {
+			result += pStringToken[0] * mult;
+		}
+		pData = new Variable(result);
 		return Result::SUCCESS;
 	}
-	if (isAllNumbers()) {
-		key = Key::INTCONSTANT;
+	if (isStringConstant(pStringToken,size)) {
+		key = Key::VARIABLE;
+		pData = new Variable(pStringToken, size);
 		return Result::SUCCESS;
 	}
-	if (isStringConstant()) {
-		key = Key::STRCONSTANT;
+	if (isVariableName(pStringToken, size)) {
+		key = Key::VARIABLENAME;
+		pData = new std::string(pStringToken,size);
 		return Result::SUCCESS;
 	}
 
 	return Result::SYNTAXERROR;
 }
 
-const char* Token::getData() const {
-	return data;
+Token::Token(const Token& copyToken) {
+	becomeCopy(copyToken);
 }
 
-int Token::getDataSize() const
-{
-	return dataLen;
+const void* Token::getData() const {
+	return pData;
 }
 
-bool Token::isAllLetters() {
-	for (uint32_t i = 0; i < dataLen; i++) {
+Token::~Token() {
+	switch (key)
+	{
+	case Key::VARIABLE:
+		delete (Variable*)pData;
+		break;
+	case Key::VARIABLENAME:
+		delete (std::string*)pData;
+		break;
+	case Key::FUNCTIONNAME:
+		delete (std::string*)pData;
+		break;
+	case Key::OPERATOR:
+		delete (Operator*)pData;
+		break;
+	}
+}
+
+Token& Token::operator=(const Token& copyToken) {
+	becomeCopy(copyToken);
+	return *this;
+}
+
+void Token::becomeCopy(const Token& copyToken) {
+	key = copyToken.key;
+	switch (key)
+	{
+	case Key::VARIABLE:
+		pData = new Variable(*(Variable*)copyToken.getData());
+		break;
+	case Key::VARIABLENAME:
+		pData = new std::string(*(std::string*)copyToken.getData());
+		break;
+	case Key::FUNCTIONNAME:
+		pData = new std::string(*(std::string*)copyToken.getData());
+		break;
+	case Key::OPERATOR:
+		pData = new Operator;
+		*(Operator*)pData = *(Operator*)copyToken.getData();
+		break;
+	}
+}
+
+//currently only support all-char variable names
+bool isVariableName(const char* data, uint32_t size) {
+	for (uint32_t i = 0; i < size; i++) {
 		if (!((data[i] <= 'Z' and data[i] >= 'A') or (data[i] <= 'z' and data[i] >= 'a'))) 
 			return false;
 	}
 	return true;
 }
-
-bool Token::isAllNumbers() {
-	for (uint32_t i = 0; i < dataLen; i++) {
+//assumes size to not be 0
+bool isNumber(const char* data, uint32_t size) {
+	if (!(data[0] <= '9' and data[0] >= '0')) {
+		if (!(data[0] == '-'))
+			return false;
+	}
+	for (uint32_t i = 1; i < size; i++) {
 		if (!(data[i] <= '9' and data[i] >= '0'))
 			return false;
 	}
 	return true;
 }
 
-bool Token::isStringConstant() {
+bool isStringConstant(const char* data, uint32_t size) {
 	if (data[0] != '"')
 		return false;
-	if (data[dataLen-1] != '"')
+	if (data[size-1] != '"')
 		return false;
 
-	for (uint32_t i = 1; i < dataLen-1; i++){
+	for (uint32_t i = 1; i < size-1; i++){
 		if (data[i] == '"')
 			return false;
 	}
@@ -99,41 +170,6 @@ bool Token::isStringConstant() {
 	return true;
 }
 
-Key Token::getKey() const {
-	return key;
-}
 
 
-Result fillTokenArray(const std::string& line, std::vector<Token>& tokenArray) {
-	const char* cLine = line.data();
-	int tokenStart = 0;
-	int i;
-	bool strConstantIsOpen = false;
-	for (i = 0; i < line.size(); i++) {
-		if (cLine[i] == ' ' and !strConstantIsOpen) {
-			Token tempToken(cLine + tokenStart, i - (tokenStart));
-			Result result = tempToken.generateKey();
-			if (result != Result::SUCCESS)
-				return result;
 
-			tokenArray.push_back(tempToken);
-			tokenStart = i + 1;
-
-		}
-
-		if (cLine[i] == '"')
-			strConstantIsOpen = !strConstantIsOpen;
-
-
-	}
-	Token tempToken(cLine + tokenStart, i - (tokenStart));
-	Result result = tempToken.generateKey();
-	if (result != Result::SUCCESS)
-		return result;
-
-	tokenArray.push_back(tempToken);
-
-
-	return Result::SUCCESS;
-
-}

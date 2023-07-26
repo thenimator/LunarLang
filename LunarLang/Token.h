@@ -1,42 +1,26 @@
 #pragma once
-#include <string>
-#include <vector>
 #include "defines.h"
-
-enum class Key {
-	ASSIGN,
-	ADD,
-	SUBTRACT,
-	MULTIPLY,
-	DIVIDE,
-	OUTPUT,
-	VARIABLE,
-	INTCONSTANT,
-	STRCONSTANT
-};
-
-
 
 class Token
 {
 public:
-	Token(const char* dataStart, int size);
+	Token();
 	Token(const Token& copyToken);
-	~Token();
 	Key getKey() const;
-	Result generateKey();
-	const char* getData() const;
-	int getDataSize() const;
+	Result generateFromString(const char* pStringToken, uint32_t size);
+	const void* getData() const;
+	~Token();
+	//https://stackoverflow.com/questions/28122942/why-is-copy-constructor-not-called-here
+	//WTF? Copy assignment and copy constructor are not the same? Copy assignment is called every time an assignment is made while copy construction only if the object didnt exist
+	Token& operator=(const Token& copyToken);
 private:
-	bool isAllLetters();
-	bool isAllNumbers();
-	bool isStringConstant();
+	void becomeCopy(const Token& copyToken);
 	Key key;
-	char* data;
-	int dataLen;
-
+	void* pData = nullptr;
 };
 
 
-Result fillTokenArray(const std::string& line, std::vector<Token>& tokenArray);
 
+bool isVariableName(const char* data, uint32_t size);
+bool isNumber(const char* data, uint32_t size);
+bool isStringConstant(const char* data, uint32_t size);

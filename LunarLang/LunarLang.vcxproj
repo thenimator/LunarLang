@@ -131,14 +131,16 @@
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="LunarLangInterpreter.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TokenList.cpp" />
+    <ClCompile Include="TokenListElement.cpp" />
     <ClCompile Include="Variable.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="constant.h" />
     <ClInclude Include="defines.h" />
-    <ClInclude Include="Output.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="LunarLangInterpreter.h" />
+    <ClInclude Include="TokenList.h" />
+    <ClInclude Include="TokenListElement.h" />
     <ClInclude Include="Variable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
