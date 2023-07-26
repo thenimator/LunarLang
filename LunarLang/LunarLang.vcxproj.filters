@@ -30,6 +30,12 @@
     <ClCompile Include="defines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TokenList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenListElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LunarLangInterpreter.h">
@@ -44,10 +50,10 @@
     <ClInclude Include="defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="constant.h">
+    <ClInclude Include="TokenList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Output.h">
+    <ClInclude Include="TokenListElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

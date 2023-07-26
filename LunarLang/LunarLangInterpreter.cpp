@@ -1,9 +1,5 @@
 #include "LunarLangInterpreter.h"
-#include <fstream>
-#include <string>
-#include "Token.h"
-#include "constant.h"
-#include "Output.h"
+#include "TokenList.h"
 
 Result LunarLangInterpreter::interpret(const char* filename) {
     std::fstream file;
@@ -12,12 +8,12 @@ Result LunarLangInterpreter::interpret(const char* filename) {
         std::string line;
         //char* line;
         while (getline(file, line)) { 
-            std::vector<Token> tokens;
-            Result result = fillTokenArray(line,tokens);
+            TokenList tokenList;
+            Result result = tokenList.fillFromLine(line);
             if (result != Result::SUCCESS)
                 return result;
 
-            result = executeTokens(tokens);
+            result = executeTokens(tokenList);
             if (result != Result::SUCCESS)
                 return result;
         }
@@ -27,23 +23,38 @@ Result LunarLangInterpreter::interpret(const char* filename) {
     return Result::SUCCESS;
 }
 
-Result LunarLangInterpreter::executeTokens(const std::vector<Token>& tokens) {
-    if (tokens.size() == 0)
+Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
+    
+    if (tokens.getSize() == 0)
         return Result::SUCCESS;
-    switch (tokens[0].getKey())
+    tokens.resetPointer();
+    switch (tokens.getCurrentElement().getToken().getKey())
     {
-    case Key::OUTPUT:
-        if (tokens.size() != 2)
-            return Result::SYNTAXERROR;
-        if (isConstant(tokens[1].getKey())) {
-            printConstantValue(tokens[1]);
-            return Result::SUCCESS;
-        }
-        return Result::ERROR;
-            
+    case Key::VARIABLENAME:
+
         break;
+
+    case Key::OPERATOR: { //https://stackoverflow.com/questions/5136295/switch-transfer-of-control-bypasses-initialization-of-when-calling-a-function
+        if (!((*(Operator*)(tokens.getCurrentElement().getToken().getData())) == Operator::OUTPUT))
+            return Result::SYNTAXERROR;
+        tokens.cutFirst(1);
+        Variable output = Variable();
+        Result result = tokens.generateValue(output);
+        if (result != Result::SUCCESS)
+            return result;
+        print(output);
+    }
+        
+
+        break;
+
+    case Key::FUNCTIONNAME:
+        return Result::IMPLEMENTATIONERROR;
+        break;
+
     case Key::VARIABLE:
-            break;
+        return Result::SYNTAXERROR;
+        break;
     default:
         return Result::SYNTAXERROR;
     }
