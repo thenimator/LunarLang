@@ -57,14 +57,14 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 		int64_t mult = 1;
 		int64_t result = 0;
 		for (uint32_t i = 0; i < (size-1); i++) {
-			result += pStringToken[size - 1 - i]*mult;
+			result += (pStringToken[size - 1 - i]-'0') * mult;
 			mult *= 10;
 		}
 		if (pStringToken[0] == '-') {
-			result *= -11;
+			result *= -1;
 		}
 		else {
-			result += pStringToken[0] * mult;
+			result += (pStringToken[0] - '0') * mult;
 		}
 		pData = new Variable(result);
 		return Result::SUCCESS;
