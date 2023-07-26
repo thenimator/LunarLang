@@ -58,4 +58,6 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
     default:
         return Result::SYNTAXERROR;
     }
+
+    return Result::SUCCESS;
 }
