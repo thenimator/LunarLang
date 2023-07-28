@@ -21,8 +21,10 @@ public:
 	Result generateValue(Variable& output);
 	void replaceCurrentAndFollowing(const TokenListElement& replacement, uint32_t followingDeleteCount);
 	const TokenListElement& getCurrentElement() const;
+	TokenListElement& getCurrentElement();
 private:
-	Result executeAdditions();
+	
+	Result executeLineOperations();
 	//takes ownership of the TokenListElement
 	void insertFirst(const TokenListElement& token);
 	TokenListElement* first = nullptr;

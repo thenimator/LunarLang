@@ -71,7 +71,7 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	}
 	if (isStringConstant(pStringToken,size)) {
 		key = Key::VARIABLE;
-		pData = new Variable(pStringToken, size);
+		pData = new Variable(pStringToken+1, size-2);
 		return Result::SUCCESS;
 	}
 	if (isVariableName(pStringToken, size)) {
@@ -85,6 +85,11 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 
 Token::Token(const Token& copyToken) {
 	becomeCopy(copyToken);
+}
+
+Token::Token(const Variable& var) {
+	key = Key::VARIABLE;
+	pData = new Variable(var);
 }
 
 const void* Token::getData() const {

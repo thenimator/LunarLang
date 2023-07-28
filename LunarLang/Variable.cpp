@@ -58,6 +58,33 @@ const void* Variable::getData() const {
 	return pData;
 }
 
+Result Variable::constructFromArithmeticOperation(const Variable& var1, const Variable& var2, Operator operation) {
+	if (operation == Operator::SUBTRACT or operation == Operator::ADD) {
+		if (var1.getDataType() == DataType::STRING and var2.getDataType() == DataType::STRING) {
+			type = DataType::STRING;
+			pData = new std::string();
+			*(std::string*)pData = *(std::string*)var1.getData() + *(std::string*)var2.getData();
+
+			return Result::SUCCESS;
+		}
+
+
+
+
+		return Result::ILLEGALOPERATIONERROR;
+	}
+	if (operation == Operator::MULTIPLY or operation == Operator::DIVIDE) {
+		if (var1.getDataType() == DataType::STRING or var2.getDataType() == DataType::STRING)
+			return Result::ILLEGALOPERATIONERROR;
+
+
+
+		return Result::ILLEGALOPERATIONERROR;
+	}
+
+	return Result::IMPLEMENTATIONERROR; //Damn you're screwed if you get this
+}
+
 void print(const Variable& value) {
 	switch (value.getDataType())
 	{

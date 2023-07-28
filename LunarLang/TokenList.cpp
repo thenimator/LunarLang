@@ -151,7 +151,7 @@ void TokenList::insertFirst(const TokenListElement& token) {
 Result TokenList::generateValue(Variable& output) {
 	Result result;
 	while (getSize() != 1) {
-		result = executeAdditions();
+		result = executeLineOperations();
 		if (result != Result::SUCCESS)
 			return result;
 	}
@@ -164,7 +164,55 @@ Result TokenList::generateValue(Variable& output) {
 	
 }
 
-Result TokenList::executeAdditions() {
+TokenListElement& TokenList::getCurrentElement() {
+	return *current;
+}
+
+Result TokenList::executeLineOperations() {
 	resetPointer();
+	if (isEmpty())
+		return Result::SYNTAXERROR;
+	Result result;
+	while (true) {
+		const TokenListElement* next = getCurrentElement().getNext();
+		if (next == nullptr)
+			return Result::SUCCESS;
+		if (next->getToken().getKey() != Key::OPERATOR) {
+			advancePointer();
+			continue;
+		}
+		const TokenListElement* nextNext = next->getNext();
+		if (nextNext == nullptr)
+			return Result::SYNTAXERROR;
+
+		Operator operation = *(Operator*)next->getToken().getData();
+		if (operation == Operator::MULTIPLY or operation == Operator::DIVIDE) {
+			advancePointer();
+			advancePointer();
+			continue;
+		}
+
+		if ((getCurrentElement().getToken().getKey() == Key::BRACKET) or (nextNext->getToken().getKey() == Key::BRACKET)) {
+			advancePointer();
+			advancePointer();
+			continue;
+		}
+		if (!(getCurrentElement().getToken().getKey() == Key::VARIABLE and nextNext->getToken().getKey() == Key::VARIABLE))
+			return Result::SYNTAXERROR;
+		Variable insert;
+		result = insert.constructFromArithmeticOperation(*(Variable*)getCurrentElement().getToken().getData(), *(Variable*)nextNext->getToken().getData(),operation);
+		if (result != Result::SUCCESS)
+			return result;
+		Token insertToken(insert);
+		replaceCurrentAndFollowing(Token(insertToken), 2);
+		
+		
+
+		
+	}
+	
+
+
+
 	return Result::IMPLEMENTATIONERROR;
 }

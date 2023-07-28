@@ -30,3 +30,7 @@ void TokenListElement::setNext(TokenListElement* next) {
 TokenListElement* TokenListElement::getNext() {
 	return next;
 }
+
+const TokenListElement* TokenListElement::getNext() const {
+	return next;
+}

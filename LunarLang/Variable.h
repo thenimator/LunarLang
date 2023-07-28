@@ -1,6 +1,5 @@
 #pragma once
 #include "defines.h"
-#include "Token.h"
 #include <memory>
 enum class DataType {
 	INTEGER,

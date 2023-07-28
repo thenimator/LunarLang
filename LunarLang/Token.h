@@ -1,11 +1,13 @@
 #pragma once
 #include "defines.h"
+#include "Variable.h"
 
 class Token
 {
 public:
 	Token();
 	Token(const Token& copyToken);
+	Token(const Variable& var);
 	Key getKey() const;
 	Result generateFromString(const char* pStringToken, uint32_t size);
 	const void* getData() const;
