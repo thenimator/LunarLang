@@ -8,7 +8,8 @@ enum class Result {
 	SYNTAXERROR,
 	UNKNOWNVARIABELERROR,
 	ERROR,
-	IMPLEMENTATIONERROR
+	IMPLEMENTATIONERROR,
+	ILLEGALOPERATIONERROR
 };
 
 enum class Key {
@@ -19,8 +20,16 @@ enum class Key {
 	//Data Type of pData is gonna be std::string
 	VARIABLENAME,
 	//Data Type of pData is gonna be std::string
-	FUNCTIONNAME
+	FUNCTIONNAME,
+	//Data Type of pData is gonna be Bracket 
+	//Currently not yet implemented
+	BRACKET
 
+};
+
+enum class Bracket {
+	OPENING,
+	CLOSING
 };
 
 enum class Operator {

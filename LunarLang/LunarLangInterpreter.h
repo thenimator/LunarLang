@@ -1,7 +1,7 @@
 #pragma once
-#include "Variable.h"
 #include "defines.h"
 #include "TokenList.h"
+#include "Variable.h"
 
 class LunarLangInterpreter
 {
