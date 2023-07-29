@@ -151,6 +151,9 @@ void TokenList::insertFirst(const TokenListElement& token) {
 Result TokenList::generateValue(Variable& output) {
 	Result result;
 	while (getSize() != 1) {
+		result = executePointOperations();
+		if (result != Result::SUCCESS)
+			return result;
 		result = executeLineOperations();
 		if (result != Result::SUCCESS)
 			return result;
@@ -168,6 +171,52 @@ TokenListElement& TokenList::getCurrentElement() {
 	return *current;
 }
 
+//Find a way to merge this with executeLineOperations. Functions are VERY similar shouldn't be hard
+Result TokenList::executePointOperations() {
+	resetPointer();
+	if (isEmpty())
+		return Result::SYNTAXERROR;
+	Result result;
+	while (true) {
+		const TokenListElement* next = getCurrentElement().getNext();
+		if (next == nullptr)
+			return Result::SUCCESS;
+		if (next->getToken().getKey() != Key::OPERATOR) {
+			advancePointer();
+			continue;
+		}
+		const TokenListElement* nextNext = next->getNext();
+		if (nextNext == nullptr)
+			return Result::SYNTAXERROR;
+
+		Operator operation = *(Operator*)next->getToken().getData();
+		if (operation == Operator::ADD or operation == Operator::SUBTRACT) {
+			advancePointer();
+			advancePointer();
+			continue;
+		}
+
+		if ((getCurrentElement().getToken().getKey() == Key::BRACKET) or (nextNext->getToken().getKey() == Key::BRACKET)) {
+			advancePointer();
+			advancePointer();
+			continue;
+		}
+		if (!(getCurrentElement().getToken().getKey() == Key::VARIABLE and nextNext->getToken().getKey() == Key::VARIABLE))
+			return Result::SYNTAXERROR;
+		Variable insert;
+		result = insert.constructFromArithmeticOperation(*(Variable*)getCurrentElement().getToken().getData(), *(Variable*)nextNext->getToken().getData(), operation);
+		if (result != Result::SUCCESS)
+			return result;
+		Token insertToken(insert);
+		replaceCurrentAndFollowing(Token(insertToken), 2);
+
+
+
+
+	}
+}
+
+//Find a way to merge this with executePointOperations. Functions are VERY similar shouldn't be hard
 Result TokenList::executeLineOperations() {
 	resetPointer();
 	if (isEmpty())

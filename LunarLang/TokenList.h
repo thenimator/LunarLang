@@ -23,7 +23,7 @@ public:
 	const TokenListElement& getCurrentElement() const;
 	TokenListElement& getCurrentElement();
 private:
-	
+	Result executePointOperations();
 	Result executeLineOperations();
 	//takes ownership of the TokenListElement
 	void insertFirst(const TokenListElement& token);

@@ -2,6 +2,7 @@
 #include "defines.h"
 #include <memory>
 enum class DataType {
+	//Deprecated
 	INTEGER,
 	FLOAT,
 	STRING
