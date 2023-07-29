@@ -23,9 +23,9 @@ Variable::Variable(const Variable& copyVar) {
 }
 
 Variable::Variable(int64_t value) {
-	type = DataType::INTEGER;
-	pData = new int64_t;
-	*(int64_t*)pData = value;
+	type = DataType::FLOAT;
+	pData = new double;
+	*(double*)pData = static_cast<double>(value);
 }
 
 Variable::Variable(const char* pString, uint32_t size) {
@@ -59,32 +59,39 @@ const void* Variable::getData() const {
 }
 
 Result Variable::constructFromArithmeticOperation(const Variable& var1, const Variable& var2, Operator operation) {
-	if (operation == Operator::SUBTRACT or operation == Operator::ADD) {
-		if (var1.getDataType() == DataType::STRING and var2.getDataType() == DataType::STRING) {
-			if (operation == Operator::SUBTRACT)
-				return Result::ILLEGALOPERATIONERROR;
-			type = DataType::STRING;
-			pData = new std::string();
-			*(std::string*)pData = *(std::string*)var1.getData() + *(std::string*)var2.getData();
-
-			return Result::SUCCESS;
-		}
-
-
-
-
-		return Result::ILLEGALOPERATIONERROR;
-	}
-	if (operation == Operator::MULTIPLY or operation == Operator::DIVIDE) {
-		if (var1.getDataType() == DataType::STRING or var2.getDataType() == DataType::STRING)
+	if (var1.getDataType() == DataType::STRING and var2.getDataType() == DataType::STRING) {
+		if (operation != Operator::ADD)
 			return Result::ILLEGALOPERATIONERROR;
+		type = DataType::STRING;
+		pData = new std::string();
+		*(std::string*)pData = *(std::string*)var1.getData() + *(std::string*)var2.getData();
 
-
-
-		return Result::ILLEGALOPERATIONERROR;
+		return Result::SUCCESS;
 	}
 
-	return Result::IMPLEMENTATIONERROR; //Damn you're screwed if you get this
+	if (var1.getDataType() == DataType::FLOAT and var2.getDataType() == DataType::FLOAT) {
+		type = DataType::FLOAT;
+		pData = new double;
+		switch (operation)
+		{
+		case Operator::ADD:
+			*(double*)pData = *(double*)var1.getData() + *(double*)var2.getData();
+			break;
+		case Operator::SUBTRACT:
+			*(double*)pData = *(double*)var1.getData() - *(double*)var2.getData();
+			break;
+		case Operator::MULTIPLY:
+			*(double*)pData = *(double*)var1.getData() * *(double*)var2.getData();
+			break;
+		case Operator::DIVIDE:
+			*(double*)pData = *(double*)var1.getData() / *(double*)var2.getData();
+			break;
+		}	
+		return Result::SUCCESS;
+	}
+
+
+	return Result::ILLEGALOPERATIONERROR; //Damn you're screwed if you get this
 }
 
 void print(const Variable& value) {
