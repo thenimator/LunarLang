@@ -61,6 +61,8 @@ const void* Variable::getData() const {
 Result Variable::constructFromArithmeticOperation(const Variable& var1, const Variable& var2, Operator operation) {
 	if (operation == Operator::SUBTRACT or operation == Operator::ADD) {
 		if (var1.getDataType() == DataType::STRING and var2.getDataType() == DataType::STRING) {
+			if (operation == Operator::SUBTRACT)
+				return Result::ILLEGALOPERATIONERROR;
 			type = DataType::STRING;
 			pData = new std::string();
 			*(std::string*)pData = *(std::string*)var1.getData() + *(std::string*)var2.getData();
