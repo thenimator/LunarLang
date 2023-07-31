@@ -6,56 +6,46 @@ Variable::Variable() {
 
 Variable::Variable(const Variable& copyVar) {
 	type = copyVar.type;
-	switch (type)
-	{
-	case DataType::INTEGER:
-		pData = new int64_t;
-		*(int64_t*)pData = *(int64_t*)copyVar.pData;
-		break;
-	case DataType::FLOAT:
-		pData = new double;
-		*(double*)pData = *(double*)copyVar.pData;
-		break;
-	case DataType::STRING:
-		pData = new std::string(*(std::string*)copyVar.pData);
-		break;
+	if (type == DataType::STRING) {
+		//can't set string a to string b if string a is uninitialized
+		new(data) std::string();
+		*(std::string*)&data = ( *(std::string*)&copyVar.data );
+	}
+	if (type == DataType::FLOAT) {
+		*(double*)&data = *(double*)&copyVar.data;
 	}
 }
 
 Variable::Variable(int64_t value) {
 	type = DataType::FLOAT;
-	pData = new double;
-	*(double*)pData = static_cast<double>(value);
+	*(double*)&data = static_cast<double>(value);
 }
 
 Variable::Variable(const char* pString, uint32_t size) {
 	type = DataType::STRING;
-	pData = new std::string(pString, size);
+	//https://stackoverflow.com/questions/222557/what-uses-are-there-for-placement-new
+	new(data) std::string(pString, size);
 }
 
 Variable::Variable(double value) {
 	type = DataType::FLOAT;
-	pData = new double;
-	*(double*)pData = value;
+	*(double*)&data = value;
 }
 
 Variable::~Variable() {
 	if (type == DataType::STRING) {
-		delete (std::string*)pData;
+		//placement new https://stackoverflow.com/questions/55892372/unable-to-manually-call-destructor-of-stdstring
+		(*(std::string*)&data).~basic_string();
 	}
-	else {
-		delete pData;
-	}
-
-	
 }
 
 DataType Variable::getDataType() const {
 	return type;
 }
 
+//returns a pointer to the data
 const void* Variable::getData() const {
-	return pData;
+	return data;
 }
 
 Result Variable::constructFromArithmeticOperation(const Variable& var1, const Variable& var2, Operator operation) {
@@ -63,28 +53,28 @@ Result Variable::constructFromArithmeticOperation(const Variable& var1, const Va
 		if (operation != Operator::ADD)
 			return Result::ILLEGALOPERATIONERROR;
 		type = DataType::STRING;
-		pData = new std::string();
-		*(std::string*)pData = *(std::string*)var1.getData() + *(std::string*)var2.getData();
+		//can't set string a to string b if string a is uninitialized
+		new(data) std::string();
+		*(std::string*)&data = *(std::string*)var1.getData() + *(std::string*)var2.getData();
 
 		return Result::SUCCESS;
 	}
 
 	if (var1.getDataType() == DataType::FLOAT and var2.getDataType() == DataType::FLOAT) {
 		type = DataType::FLOAT;
-		pData = new double;
 		switch (operation)
 		{
 		case Operator::ADD:
-			*(double*)pData = *(double*)var1.getData() + *(double*)var2.getData();
+			*(double*)&data = *(double*)var1.getData() + *(double*)var2.getData();
 			break;
 		case Operator::SUBTRACT:
-			*(double*)pData = *(double*)var1.getData() - *(double*)var2.getData();
+			*(double*)&data = *(double*)var1.getData() - *(double*)var2.getData();
 			break;
 		case Operator::MULTIPLY:
-			*(double*)pData = *(double*)var1.getData() * *(double*)var2.getData();
+			*(double*)&data = *(double*)var1.getData() * *(double*)var2.getData();
 			break;
 		case Operator::DIVIDE:
-			*(double*)pData = *(double*)var1.getData() / *(double*)var2.getData();
+			*(double*)&data = *(double*)var1.getData() / *(double*)var2.getData();
 			break;
 		}	
 		return Result::SUCCESS;
