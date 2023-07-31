@@ -23,7 +23,7 @@ public:
 	[[nodiscard]] Result constructFromArithmeticOperation(const Variable& var1, const Variable& var2, Operator operation);
 
 private:
-	void* pData = nullptr;
+	uint8_t data[sizeof(std::string)];
 	DataType type;
 };
 
