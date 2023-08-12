@@ -1,4 +1,5 @@
 #include "TokenList.h"
+#include "ScopeManagerAccess.h"
 
 TokenList::TokenList() {
 
@@ -132,8 +133,6 @@ void TokenList::replaceCurrentAndFollowing(const TokenListElement& replacement, 
 	}
 	heapReplacement->setNext(firstNotReplace);
 	current = heapReplacement;
-
-
 }
 
 const TokenListElement& TokenList::getCurrentElement() const {
@@ -169,6 +168,32 @@ Result TokenList::generateValue(Variable& output) {
 
 TokenListElement& TokenList::getCurrentElement() {
 	return *current;
+}
+
+Result TokenList::gainTokenValues() {
+	if (getSize() == 0)
+		return Result::SUCCESS;
+	resetPointer();
+	while (current != nullptr) {
+		if (getCurrentElement().getToken().getKey() != Key::VARIABLENAME) {
+			previous = current;
+			current = current->getNext();
+			continue;
+		}
+			
+		Variable output;
+		Result result = scopeManager.getVariableValue(*(std::string*)getCurrentElement().getToken().getData(), output);
+		if (result != Result::SUCCESS)
+			return result;
+
+		TokenListElement replacement = TokenListElement(Token(output));
+		replaceCurrentAndFollowing(replacement, 0);
+		
+		previous = current;
+		current = current->getNext();
+	}
+	resetPointer();
+	return Result::SUCCESS;
 }
 
 //Find a way to merge this with executeLineOperations. Functions are VERY similar shouldn't be hard

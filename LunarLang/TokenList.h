@@ -22,6 +22,7 @@ public:
 	void replaceCurrentAndFollowing(const TokenListElement& replacement, uint32_t followingDeleteCount);
 	const TokenListElement& getCurrentElement() const;
 	TokenListElement& getCurrentElement();
+	Result gainTokenValues();
 private:
 	Result executePointOperations();
 	Result executeLineOperations();
