@@ -3,13 +3,16 @@
 #include <string>
 #include <vector>
 #include <fstream>
+
+//TODO change cases on all results
 enum class Result {
 	SUCCESS,
 	SYNTAXERROR,
-	UNKNOWNVARIABELERROR,
+	UNKNOWNVARIABLEERROR,
 	ERROR,
 	IMPLEMENTATIONERROR,
-	ILLEGALOPERATIONERROR
+	ILLEGALOPERATIONERROR,
+	NoLowerScopeError
 };
 
 enum class Key {

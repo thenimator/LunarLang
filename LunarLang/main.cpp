@@ -12,7 +12,7 @@ int main() {
 		case Result::SYNTAXERROR:
 			std::cout << "Syntax" << "\n";
 			break;
-		case Result::UNKNOWNVARIABELERROR:
+		case Result::UNKNOWNVARIABLEERROR:
 			std::cout << "Unknown variable" << "\n";
 			break;
 		case Result::ERROR:

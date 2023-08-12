@@ -5,15 +5,14 @@ Variable::Variable() {
 }
 
 Variable::Variable(const Variable& copyVar) {
-	type = copyVar.type;
-	if (type == DataType::STRING) {
-		//can't set string a to string b if string a is uninitialized
-		new(data) std::string();
-		*(std::string*)&data = ( *(std::string*)&copyVar.data );
-	}
-	if (type == DataType::FLOAT) {
-		*(double*)&data = *(double*)&copyVar.data;
-	}
+	becomeCopy(copyVar);
+}
+
+Variable& Variable::operator=(const Variable& copyVar) {
+	destroy();
+	becomeCopy(copyVar);
+
+	return *this;
 }
 
 Variable::Variable(int64_t value) {
@@ -33,10 +32,7 @@ Variable::Variable(double value) {
 }
 
 Variable::~Variable() {
-	if (type == DataType::STRING) {
-		//placement new https://stackoverflow.com/questions/55892372/unable-to-manually-call-destructor-of-stdstring
-		(*(std::string*)&data).~basic_string();
-	}
+	destroy();
 }
 
 DataType Variable::getDataType() const {
@@ -82,6 +78,26 @@ Result Variable::constructFromArithmeticOperation(const Variable& var1, const Va
 
 
 	return Result::ILLEGALOPERATIONERROR; //Damn you're screwed if you get this
+}
+
+void Variable::becomeCopy(const Variable& copyVar) {
+	type = copyVar.type;
+	if (type == DataType::STRING) {
+		//can't set string a to string b if string a is uninitialized
+		new(data) std::string();
+		*(std::string*)&data = (*(std::string*)&copyVar.data);
+	}
+	if (type == DataType::FLOAT) {
+		*(double*)&data = *(double*)&copyVar.data;
+	}
+}
+
+void Variable::destroy() {
+	if (type == DataType::STRING) {
+		//placement new https://stackoverflow.com/questions/55892372/unable-to-manually-call-destructor-of-stdstring
+		std::string debughelp = *(std::string*)&data;
+		(*(std::string*)&data).~basic_string();
+	}
 }
 
 void print(const Variable& value) {

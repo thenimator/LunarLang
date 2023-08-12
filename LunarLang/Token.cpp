@@ -1,5 +1,6 @@
 #include "Token.h"
 #include "Variable.h"
+#include "ScopeManagerAccess.h"
 
 Token::Token() {
 
@@ -40,7 +41,7 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	if (size == 1 and pStringToken[0] == '=') {
 		key = Key::OPERATOR;
 		pData = new Operator;
-		*(Operator*)pData = Operator::DIVIDE;
+		*(Operator*)pData = Operator::ASSIGN;
 		return Result::SUCCESS;
 	}
 	if (size == 3) {
@@ -76,7 +77,7 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	}
 	if (isVariableName(pStringToken, size)) {
 		key = Key::VARIABLENAME;
-		pData = new std::string(pStringToken,size);
+		pData = new std::string(pStringToken, size);
 		return Result::SUCCESS;
 	}
 
@@ -115,6 +116,24 @@ Token::~Token() {
 }
 
 Token& Token::operator=(const Token& copyToken) {
+	if (pData != nullptr) {
+		switch (key)
+		{
+		case Key::VARIABLE:
+			delete (Variable*)pData;
+			break;
+		case Key::VARIABLENAME:
+			delete (std::string*)pData;
+			break;
+		case Key::FUNCTIONNAME:
+			delete (std::string*)pData;
+			break;
+		case Key::OPERATOR:
+			delete (Operator*)pData;
+			break;
+		}
+	}
+
 	becomeCopy(copyToken);
 	return *this;
 }

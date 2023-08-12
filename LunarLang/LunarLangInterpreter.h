@@ -2,6 +2,7 @@
 #include "defines.h"
 #include "TokenList.h"
 #include "Variable.h"
+#include "ScopeManagerAccess.h"
 
 class LunarLangInterpreter
 {
