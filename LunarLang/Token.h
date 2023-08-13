@@ -14,6 +14,7 @@ public:
 	~Token();
 	Token& operator=(const Token& copyToken);
 private:
+	void destroy();
 	void becomeCopy(const Token& copyToken);
 	Key key;
 	void* pData = nullptr;
