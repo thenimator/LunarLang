@@ -98,24 +98,17 @@ const void* Token::getData() const {
 }
 
 Token::~Token() {
-	switch (key)
-	{
-	case Key::VARIABLE:
-		delete (Variable*)pData;
-		break;
-	case Key::VARIABLENAME:
-		delete (std::string*)pData;
-		break;
-	case Key::FUNCTIONNAME:
-		delete (std::string*)pData;
-		break;
-	case Key::OPERATOR:
-		delete (Operator*)pData;
-		break;
-	}
+	destroy();
 }
 
 Token& Token::operator=(const Token& copyToken) {
+	
+	destroy();
+	becomeCopy(copyToken);
+	return *this;
+}
+
+void Token::destroy() {
 	if (pData != nullptr) {
 		switch (key)
 		{
@@ -133,9 +126,6 @@ Token& Token::operator=(const Token& copyToken) {
 			break;
 		}
 	}
-
-	becomeCopy(copyToken);
-	return *this;
 }
 
 void Token::becomeCopy(const Token& copyToken) {
