@@ -44,6 +44,18 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 		*(Operator*)pData = Operator::ASSIGN;
 		return Result::SUCCESS;
 	}
+	if (size == 1 and pStringToken[0] == '(') {
+		key = Key::BRACKET;
+		pData = new Bracket;
+		*(Bracket*)pData = Bracket::OPENING;
+		return Result::SUCCESS;
+	}
+	if (size == 1 and pStringToken[0] == ')') {
+		key = Key::BRACKET;
+		pData = new Bracket;
+		*(Bracket*)pData = Bracket::CLOSING;
+		return Result::SUCCESS;
+	}
 	if (size == 3) {
 		if (pStringToken[0] == 'o' and pStringToken[1] == 'u' and pStringToken[2] == 't') {
 			key = Key::OPERATOR;
@@ -124,6 +136,9 @@ void Token::destroy() {
 		case Key::OPERATOR:
 			delete (Operator*)pData;
 			break;
+		case Key::BRACKET:
+			delete (Bracket*)pData;
+			break;
 		}
 	}
 }
@@ -144,6 +159,10 @@ void Token::becomeCopy(const Token& copyToken) {
 	case Key::OPERATOR:
 		pData = new Operator;
 		*(Operator*)pData = *(Operator*)copyToken.getData();
+		break;
+	case Key::BRACKET:
+		pData = new Bracket;
+		*(Bracket*)pData = *(Bracket*)copyToken.getData();
 		break;
 	}
 }
