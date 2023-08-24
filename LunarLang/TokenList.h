@@ -24,6 +24,7 @@ public:
 	TokenListElement& getCurrentElement();
 	Result gainTokenValues();
 private:
+	Result removeUnusedBrackets();
 	Result executePointOperations();
 	Result executeLineOperations();
 	//takes ownership of the TokenListElement

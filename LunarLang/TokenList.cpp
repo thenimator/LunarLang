@@ -150,13 +150,19 @@ void TokenList::insertFirst(const TokenListElement& token) {
 Result TokenList::generateValue(Variable& output) {
 	Result result;
 	while (getSize() != 1) {
+		result = removeUnusedBrackets();
+		if (result != Result::SUCCESS)
+			return result;
 		result = executePointOperations();
 		if (result != Result::SUCCESS)
 			return result;
 		result = executeLineOperations();
 		if (result != Result::SUCCESS)
 			return result;
+		first;
+		
 	}
+	//Last remaining Token must have a value
 	if (getCurrentElement().getToken().getKey() == Key::VARIABLE) {
 		output = *(Variable*)getCurrentElement().getToken().getData();
 		return Result::SUCCESS;
@@ -289,4 +295,42 @@ Result TokenList::executeLineOperations() {
 
 
 	return Result::IMPLEMENTATIONERROR;
+}
+
+Result TokenList::removeUnusedBrackets() {
+	resetPointer();
+	if (isEmpty())
+		return Result::SYNTAXERROR;
+	Result result;
+
+	while (true) {
+		const TokenListElement* next = getCurrentElement().getNext();
+		if (next == nullptr)
+			return Result::SUCCESS;
+		if (getCurrentElement().getToken().getKey() != Key::BRACKET) {
+			advancePointer();
+			continue;
+		}
+		if (*(Bracket*)getCurrentElement().getToken().getData() == Bracket::CLOSING) {
+			advancePointer();
+			continue;
+		}
+		const TokenListElement* nextNext = next->getNext();
+		if (nextNext == nullptr)
+			return Result::SYNTAXERROR;
+		if (nextNext->getToken().getKey() != Key::BRACKET) {
+			advancePointer();
+			continue;
+		}
+		if (*(Bracket*)nextNext->getToken().getData() != Bracket::CLOSING) {
+			advancePointer();
+			continue;
+		}
+			
+		replaceCurrentAndFollowing(TokenListElement(*next),2);
+
+	}
+
+
+	
 }
