@@ -24,14 +24,14 @@ public:
 	TokenListElement& getCurrentElement();
 	Result gainTokenValues();
 private:
-	Result removeUnusedBrackets();
-	Result executePointOperations();
-	Result executeLineOperations();
 	//takes ownership of the TokenListElement
 	void insertFirst(const TokenListElement& token);
 	TokenListElement* first = nullptr;
 	TokenListElement* last = nullptr;
 	TokenListElement* current = nullptr;
 	TokenListElement* previous = nullptr;
+	Result calculateValue(TokenListElement* start, TokenListElement* end);
+	//only accepts ADD, SUBTRACT, MULTIPLY, DIVIDE
+	Result executeOperations(TokenListElement* start, TokenListElement* end, OperationType type);
 };
 

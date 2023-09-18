@@ -149,19 +149,12 @@ void TokenList::insertFirst(const TokenListElement& token) {
 
 Result TokenList::generateValue(Variable& output) {
 	Result result;
-	while (getSize() != 1) {
-		result = removeUnusedBrackets();
-		if (result != Result::SUCCESS)
-			return result;
-		result = executePointOperations();
-		if (result != Result::SUCCESS)
-			return result;
-		result = executeLineOperations();
-		if (result != Result::SUCCESS)
-			return result;
-		first;
+	
+	result = calculateValue(first,nullptr);
+	if (result != Result::SUCCESS)
+		return result;
 		
-	}
+	
 	//Last remaining Token must have a value
 	if (getCurrentElement().getToken().getKey() == Key::VARIABLE) {
 		output = *(Variable*)getCurrentElement().getToken().getData();
@@ -202,135 +195,102 @@ Result TokenList::gainTokenValues() {
 	return Result::SUCCESS;
 }
 
-//Find a way to merge this with executeLineOperations. Functions are VERY similar shouldn't be hard
-Result TokenList::executePointOperations() {
-	resetPointer();
-	if (isEmpty())
-		return Result::SYNTAXERROR;
-	Result result;
-	while (true) {
-		const TokenListElement* next = getCurrentElement().getNext();
-		if (next == nullptr)
-			return Result::SUCCESS;
+Result TokenList::executeOperations(TokenListElement* start, TokenListElement* pastEnd, OperationType type) {
+	TokenListElement* localCurrent = start;
+	TokenListElement* next = start->next;
+	TokenListElement* nextNext;
+	while (next != pastEnd) {
 		if (next->getToken().getKey() != Key::OPERATOR) {
-			advancePointer();
-			continue;
-		}
-		const TokenListElement* nextNext = next->getNext();
-		if (nextNext == nullptr)
 			return Result::SYNTAXERROR;
-
-		Operator operation = *(Operator*)next->getToken().getData();
-		if (operation == Operator::ADD or operation == Operator::SUBTRACT) {
-			advancePointer();
-			advancePointer();
-			continue;
 		}
-
-		if ((getCurrentElement().getToken().getKey() == Key::BRACKET) or (nextNext->getToken().getKey() == Key::BRACKET)) {
-			advancePointer();
-			advancePointer();
-			continue;
+		if (getOperationType(*(Operator*)next->getToken().getData()) == type) {
+			nextNext = next->next;
+			if (nextNext == nullptr) {
+				return Result::SYNTAXERROR;
+			}
+			if (localCurrent->getToken().getKey() != Key::VARIABLE) {
+				return Result::SYNTAXERROR;
+			}
+			if (nextNext->getToken().getKey() != Key::VARIABLE) {
+				return Result::SYNTAXERROR;
+			}
+			Variable resultValue;
+			Result result = resultValue.constructFromArithmeticOperation(*(Variable*)localCurrent->getToken().getData(), *(Variable*)nextNext->getToken().getData(),*(Operator*)next->getToken().getData());
+			if (result != Result::SUCCESS)
+				return result;
+			Token resultToken(resultValue);
+			//HEREHHGHUIEGBKGEUKGSSBGSEBUSGKHEUG
+			localCurrent->token = std::move(resultToken);
+			TokenListElement* bac = nextNext->getNext();
+			delete next;
+			delete nextNext;
+			next = bac;
+			localCurrent->next = next;
 		}
-		if (!(getCurrentElement().getToken().getKey() == Key::VARIABLE and nextNext->getToken().getKey() == Key::VARIABLE))
-			return Result::SYNTAXERROR;
-		Variable insert;
-		result = insert.constructFromArithmeticOperation(*(Variable*)getCurrentElement().getToken().getData(), *(Variable*)nextNext->getToken().getData(), operation);
-		if (result != Result::SUCCESS)
-			return result;
-		Token insertToken(insert);
-		replaceCurrentAndFollowing(Token(insertToken), 2);
-
-
-
-
+		else {
+			nextNext = next->next;
+			if (nextNext == nullptr) {
+				return Result::SYNTAXERROR;
+			}
+			localCurrent = nextNext;
+			next = localCurrent->next;
+		}
 	}
+	return Result::SUCCESS;
+
+
 }
 
-//Find a way to merge this with executePointOperations. Functions are VERY similar shouldn't be hard
-Result TokenList::executeLineOperations() {
-	resetPointer();
-	if (isEmpty())
-		return Result::SYNTAXERROR;
+Result TokenList::calculateValue(TokenListElement* start, TokenListElement* pastEnd) {
 	Result result;
-	while (true) {
-		const TokenListElement* next = getCurrentElement().getNext();
-		if (next == nullptr)
-			return Result::SUCCESS;
-		if (next->getToken().getKey() != Key::OPERATOR) {
-			advancePointer();
-			continue;
+	
+	TokenListElement* last = nullptr;
+	TokenListElement* localCurrent = start;
+	uint32_t currentBracketLevel = 0;
+	TokenListElement* bracket = nullptr;
+	TokenListElement* inBracketFirst = nullptr;
+	TokenListElement* inBracketLast = nullptr;
+	while (localCurrent != pastEnd) {
+		if (localCurrent->getToken().getKey() == Key::BRACKET) {
+			if (*(Bracket*)localCurrent->getToken().getData() == Bracket::OPENING) {
+				currentBracketLevel++;
+				if (currentBracketLevel == 1) {
+					bracket = localCurrent;
+					inBracketFirst = localCurrent->getNext();
+				}
+			} else {
+				currentBracketLevel--;
+				if (currentBracketLevel == 0) {
+					inBracketLast = last;
+					result = calculateValue(inBracketFirst, inBracketLast->next);
+					if (result != Result::SUCCESS)
+						return result;
+					bracket->token = std::move(inBracketFirst->token);
+					delete inBracketFirst;
+					bracket->next = localCurrent->next;
+					delete localCurrent;
+					localCurrent = bracket;
+				}
+				if (currentBracketLevel < 0) {
+					return Result::SYNTAXERROR;
+				}
+			}
 		}
-		const TokenListElement* nextNext = next->getNext();
-		if (nextNext == nullptr)
-			return Result::SYNTAXERROR;
 
-		Operator operation = *(Operator*)next->getToken().getData();
-		if (operation == Operator::MULTIPLY or operation == Operator::DIVIDE) {
-			advancePointer();
-			advancePointer();
-			continue;
-		}
-
-		if ((getCurrentElement().getToken().getKey() == Key::BRACKET) or (nextNext->getToken().getKey() == Key::BRACKET)) {
-			advancePointer();
-			advancePointer();
-			continue;
-		}
-		if (!(getCurrentElement().getToken().getKey() == Key::VARIABLE and nextNext->getToken().getKey() == Key::VARIABLE))
-			return Result::SYNTAXERROR;
-		Variable insert;
-		result = insert.constructFromArithmeticOperation(*(Variable*)getCurrentElement().getToken().getData(), *(Variable*)nextNext->getToken().getData(),operation);
-		if (result != Result::SUCCESS)
-			return result;
-		Token insertToken(insert);
-		replaceCurrentAndFollowing(Token(insertToken), 2);
-		
-		
-
-		
+		last = localCurrent;
+		localCurrent = localCurrent->getNext();
 	}
+
+
+	result = executeOperations(start, pastEnd, OperationType::POINT);
+	if (result != Result::SUCCESS)
+		return result;
+	result = executeOperations(start, pastEnd, OperationType::LINE);
+	if (result != Result::SUCCESS)
+		return result;
+
 	
 
-
-
-	return Result::IMPLEMENTATIONERROR;
-}
-
-Result TokenList::removeUnusedBrackets() {
-	resetPointer();
-	if (isEmpty())
-		return Result::SYNTAXERROR;
-	Result result;
-
-	while (true) {
-		const TokenListElement* next = getCurrentElement().getNext();
-		if (next == nullptr)
-			return Result::SUCCESS;
-		if (getCurrentElement().getToken().getKey() != Key::BRACKET) {
-			advancePointer();
-			continue;
-		}
-		if (*(Bracket*)getCurrentElement().getToken().getData() == Bracket::CLOSING) {
-			advancePointer();
-			continue;
-		}
-		const TokenListElement* nextNext = next->getNext();
-		if (nextNext == nullptr)
-			return Result::SYNTAXERROR;
-		if (nextNext->getToken().getKey() != Key::BRACKET) {
-			advancePointer();
-			continue;
-		}
-		if (*(Bracket*)nextNext->getToken().getData() != Bracket::CLOSING) {
-			advancePointer();
-			continue;
-		}
-			
-		replaceCurrentAndFollowing(TokenListElement(*next),2);
-
-	}
-
-
+	return Result::SUCCESS;
 	
 }

@@ -13,6 +13,7 @@ public:
 	const void* getData() const;
 	~Token();
 	Token& operator=(const Token& copyToken);
+	Token& operator=(Token&& consumeToken);
 private:
 	void destroy();
 	void becomeCopy(const Token& copyToken);

@@ -120,6 +120,15 @@ Token& Token::operator=(const Token& copyToken) {
 	return *this;
 }
 
+Token& Token::operator=(Token&& consumeToken) {
+	destroy();
+	pData = consumeToken.pData;
+	consumeToken.pData = nullptr;
+	key = consumeToken.key;
+	consumeToken.key = Key::EMPTY;
+	return *this;
+}
+
 void Token::destroy() {
 	if (pData != nullptr) {
 		switch (key)
