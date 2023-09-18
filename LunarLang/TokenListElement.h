@@ -14,8 +14,9 @@ public:
 	void setNext(TokenListElement* next);
 	TokenListElement* getNext();
 	const TokenListElement* getNext() const;
-private:
-	TokenListElement* next = nullptr;
 	Token token;
+	TokenListElement* next = nullptr;
+private:
+	
 };
 

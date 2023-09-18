@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <utility>
 
 //TODO change cases on all results
 enum class Result {
@@ -25,8 +26,9 @@ enum class Key {
 	//Data Type of pData is gonna be std::string
 	FUNCTIONNAME,
 	//Data Type of pData is gonna be Bracket 
-	//Currently not yet implemented
-	BRACKET
+	BRACKET,
+
+	EMPTY
 
 };
 
@@ -43,3 +45,10 @@ enum class Operator {
 	DIVIDE,
 	OUTPUT
 };
+
+enum class OperationType {
+	POINT,
+	LINE
+};
+
+OperationType getOperationType(Operator op);
