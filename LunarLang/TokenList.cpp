@@ -1,6 +1,6 @@
 #include "TokenList.h"
 #include "ScopeManagerAccess.h"
-
+#include "LulaErrorAccess.h"
 TokenList::TokenList() {
 
 }
@@ -246,7 +246,7 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 	
 	TokenListElement* last = nullptr;
 	TokenListElement* localCurrent = start;
-	uint32_t currentBracketLevel = 0;
+	int32_t currentBracketLevel = 0;
 	TokenListElement* bracket = nullptr;
 	TokenListElement* inBracketFirst = nullptr;
 	TokenListElement* inBracketLast = nullptr;
@@ -257,7 +257,7 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 				if (currentBracketLevel == 1) {
 					bracket = localCurrent;
 					inBracketFirst = localCurrent->getNext();
-					//programs crashes when given tokesn " ( ) " instead of throwing an error. This should fix it
+					//programs crashes when given tokens " ( ) " instead of throwing an error. This should fix it
 					if (inBracketFirst->getToken().getKey() == Key::BRACKET) {
 						if (*(Bracket*)inBracketFirst->getToken().getData() == Bracket::CLOSING) {
 							return Result::SYNTAXERROR;
@@ -277,9 +277,15 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 					delete localCurrent;
 					localCurrent = bracket;
 				}
+				//can probably be removed
 				if (currentBracketLevel < 0) {
+					LulaErrorCreateObject eLula;
+					eLula.errorMessage = "Unexpected token ')' no matching opening bracked found";
+					lulaError = std::move(eLula);
+					eLula.errorType = ErrorType::SyntaxError;
 					return Result::SYNTAXERROR;
 				}
+				
 			}
 		}
 

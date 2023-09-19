@@ -1,4 +1,5 @@
 #include "LunarLangInterpreter.h"
+#include "LulaErrorAccess.h"
 int main() {
 	LunarLangInterpreter interpreter;
 	std::string input;
@@ -27,6 +28,7 @@ int main() {
 		default:
 			break;
 		}
+		std::cout << lulaError.what() << "\n";
 		return -1;
 	}
 	return 0;
