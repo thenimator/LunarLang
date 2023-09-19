@@ -257,6 +257,12 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 				if (currentBracketLevel == 1) {
 					bracket = localCurrent;
 					inBracketFirst = localCurrent->getNext();
+					//programs crashes when given tokesn " ( ) " instead of throwing an error. This should fix it
+					if (inBracketFirst->getToken().getKey() == Key::BRACKET) {
+						if (*(Bracket*)inBracketFirst->getToken().getData() == Bracket::CLOSING) {
+							return Result::SYNTAXERROR;
+						}
+					}
 				}
 			} else {
 				currentBracketLevel--;
@@ -280,7 +286,10 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 		last = localCurrent;
 		localCurrent = localCurrent->getNext();
 	}
-
+	/* Check is unnecessary because the programs already throws an error
+	if (currentBracketLevel != 0)
+		return Result::SYNTAXERROR;
+	*/
 
 	result = executeOperations(start, pastEnd, OperationType::POINT);
 	if (result != Result::SUCCESS)
