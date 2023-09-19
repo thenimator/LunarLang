@@ -45,6 +45,12 @@
     <ClCompile Include="GlobalScopeManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LulaError.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalErrorMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LunarLangInterpreter.h">
@@ -72,6 +78,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScopeManagerAccess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LulaError.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LulaErrorAccess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

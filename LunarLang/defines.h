@@ -16,6 +16,15 @@ enum class Result {
 	NoLowerScopeError
 };
 
+enum class ErrorType {
+	NoError,
+	SyntaxError,
+	UnknownVariableError,
+	ImplementationError,
+	IllegalOperationError,
+	NoLowerScopeError
+};
+
 enum class Key {
 	//Data Type of pData is gonna be Operator
 	OPERATOR,

@@ -1,8 +1,15 @@
 #include "LunarLangInterpreter.h"
 #include "TokenList.h"
 #include "ScopeManagerAccess.h"
-
+#include "LulaErrorAccess.h"
 Result LunarLangInterpreter::interpret(const char* filename) {
+    LulaErrorCreateObject reset;
+    reset.errorLine = 0;
+    reset.errorMessage = "";
+    reset.errorType = ErrorType::NoError;
+    reset.errorFilename = "";
+    lulaError = std::move(reset);
+
     std::fstream file;
     file.open(filename, std::ios::in); 
     if (file.is_open()) {   
