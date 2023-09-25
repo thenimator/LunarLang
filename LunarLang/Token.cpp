@@ -81,6 +81,12 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			*(Operator*)pData = Operator::OR;
 			return Result::SUCCESS;
 		}
+		if (strncmp(pStringToken, "if", 2) == 0) {
+			key = Key::CONDITIONAL;
+			*(Conditional*)pData = Conditional::IF;
+			*(Operator*)pData = Operator::OR;
+			return Result::SUCCESS;
+		}
 	}
 	if (size == 3) {
 		if (pStringToken[0] == 'o' and pStringToken[1] == 'u' and pStringToken[2] == 't') {
@@ -105,7 +111,6 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	if (size == 4) {
 		if (strncmp(pStringToken, "true", 4) == 0) {
 			key = Key::VARIABLE;
-			pData = new Variable;
 			pData = new Variable(true);
 			return Result::SUCCESS;
 		}
@@ -113,10 +118,14 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	if (size == 5) {
 		if (strncmp(pStringToken, "false", 5) == 0) {
 			key = Key::VARIABLE;
-			pData = new Variable;
 			pData = new Variable(false);
 			return Result::SUCCESS;
-
+		}
+		if (strncmp(pStringToken, "input", 5) == 0) {
+			key = Key::INPUT;
+			pData = new Input;
+			*(Input*)pData = Input::BASIC;
+			return Result::SUCCESS;
 		}
 	}
 	//Working until this point

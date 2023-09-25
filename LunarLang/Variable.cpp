@@ -52,11 +52,9 @@ const void* Variable::getData() const {
 
 Result Variable::constructFromArithmeticOperation(const Variable& var1, const Variable& var2, Operator operation) {
 	if (var1.getDataType() == DataType::STRING and var2.getDataType() == DataType::STRING) {
-		if (operation != Operator::ADD)
-			
 		switch (operation)
 		{
-		case Operator::ADD:
+		case Operator::ADD: 
 			type = DataType::STRING;
 			//can't set string a to string b if string a is uninitialized
 			new(data) std::string();
