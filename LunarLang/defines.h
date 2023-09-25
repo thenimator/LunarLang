@@ -52,12 +52,22 @@ enum class Operator {
 	SUBTRACT,
 	MULTIPLY,
 	DIVIDE,
-	OUTPUT
+	OUTPUT,
+	EQUALS,
+	UNEQUALS,
+	AND,
+	OR
 };
 
 enum class OperationType {
 	POINT,
-	LINE
+	LINE,
+	AND,
+	OR,
+	EQUALS,
+	UNEQUALS
 };
 
 OperationType getOperationType(Operator op);
+const char* operationString(Operator op);
+const char* boolName(bool input);

@@ -157,7 +157,8 @@ Result TokenList::generateValue(Variable& output) {
 	
 	//Last remaining Token must have a value
 	if (getCurrentElement().getToken().getKey() == Key::VARIABLE) {
-		output = *(Variable*)getCurrentElement().getToken().getData();
+		//output = *(Variable*)getCurrentElement().getToken().getData();
+		output = *(Variable*)first->token.getData();
 		return Result::SUCCESS;
 	}
 	return Result::SYNTAXERROR;
@@ -219,7 +220,6 @@ Result TokenList::executeOperations(TokenListElement* start, TokenListElement* p
 			if (result != Result::SUCCESS)
 				return result;
 			Token resultToken(resultValue);
-			//HEREHHGHUIEGBKGEUKGSSBGSEBUSGKHEUG
 			localCurrent->token = std::move(resultToken);
 			TokenListElement* bac = nextNext->getNext();
 			delete next;
@@ -301,6 +301,18 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 	if (result != Result::SUCCESS)
 		return result;
 	result = executeOperations(start, pastEnd, OperationType::LINE);
+	if (result != Result::SUCCESS)
+		return result;
+	result = executeOperations(start, pastEnd, OperationType::EQUALS);
+	if (result != Result::SUCCESS)
+		return result;
+	result = executeOperations(start, pastEnd, OperationType::UNEQUALS);
+	if (result != Result::SUCCESS)
+		return result;
+	result = executeOperations(start, pastEnd, OperationType::AND);
+	if (result != Result::SUCCESS)
+		return result;
+	result = executeOperations(start, pastEnd, OperationType::OR);
 	if (result != Result::SUCCESS)
 		return result;
 
