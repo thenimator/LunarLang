@@ -29,6 +29,8 @@ int main() {
 			break;
 		}
 		std::cout << lulaError.what() << "\n";
+		std::cout << "In " << lulaError.file() << "\n";
+		std::cout << "On line " << lulaError.line() << "\n";
 		return -1;
 	}
 	return 0;
