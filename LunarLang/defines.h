@@ -37,8 +37,20 @@ enum class Key {
 	//Data Type of pData is gonna be Bracket 
 	BRACKET,
 
-	EMPTY
+	EMPTY,
 
+	CONDITIONAL,
+
+	INPUT
+
+};
+
+enum class Input {
+	BASIC
+};
+
+enum class Conditional {
+	IF
 };
 
 enum class Bracket {

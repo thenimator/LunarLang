@@ -1,10 +1,21 @@
 #include "LunarLangInterpreter.h"
 #include "LulaErrorAccess.h"
-int main() {
+int main(int argc, char* argv[]) {
 	LunarLangInterpreter interpreter;
 	std::string input;
-	std::cout << "Type the file path of the script you want to execute: " << "\n";
-	std::cin >> input;
+	if (argc == 1) {
+		std::cout << argv[0] << "\n";
+		std::cout << "Type the file path of the script you want to execute: " << "\n";
+		std::cin >> input;
+	}
+	else if (argc == 2) {
+		input = argv[1];
+	}
+	else {
+		std::cout << "Not gonna deal with those arguments" << "\n";
+		return -1;
+	}
+	
 	Result result = interpreter.interpret(input.c_str());
 	if (result != Result::SUCCESS) {
 		std::cout << "SUCKS TO BE YOU!" << "\n";
