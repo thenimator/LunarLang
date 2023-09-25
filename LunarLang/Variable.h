@@ -5,7 +5,8 @@ enum class DataType {
 	//Deprecated
 	INTEGER,
 	FLOAT,
-	STRING
+	STRING,
+	BOOL
 };
 
 //TODO: Remove variable type INT and change it to double
@@ -14,6 +15,7 @@ class Variable
 {
 public:
 	Variable();
+	Variable(bool input);
 	Variable(const Variable& copyVar);
 	Variable& operator=(const Variable& copyVar);
 	Variable(int64_t value);

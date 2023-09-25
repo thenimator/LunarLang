@@ -1,8 +1,14 @@
 #include "Variable.h"
+#include "LulaErrorAccess.h"
 
 Variable::Variable() {
 
 }
+
+Variable::Variable(bool input) {
+	type = DataType::BOOL;
+	*(bool*)&data = input;
+} 
 
 Variable::Variable(const Variable& copyVar) {
 	becomeCopy(copyVar);
@@ -47,32 +53,99 @@ const void* Variable::getData() const {
 Result Variable::constructFromArithmeticOperation(const Variable& var1, const Variable& var2, Operator operation) {
 	if (var1.getDataType() == DataType::STRING and var2.getDataType() == DataType::STRING) {
 		if (operation != Operator::ADD)
+			
+		switch (operation)
+		{
+		case Operator::ADD:
+			type = DataType::STRING;
+			//can't set string a to string b if string a is uninitialized
+			new(data) std::string();
+			*(std::string*)&data = *(std::string*)var1.getData() + *(std::string*)var2.getData();
+			break;
+		case Operator::EQUALS:
+			type = DataType::BOOL;
+			*(bool*)&data = *(std::string*)var1.getData() == *(std::string*)var2.getData();
+			break;
+		case Operator::UNEQUALS:
+			type = DataType::BOOL;
+			*(bool*)&data = *(std::string*)var1.getData() != *(std::string*)var2.getData();
+			break;
+		default:
+			LulaErrorCreateObject eLula;
+			eLula.errorMessage = std::string("Illegal operation string ") + operationString(operation) + " string.";
+			lulaError = std::move(eLula);
 			return Result::ILLEGALOPERATIONERROR;
-		type = DataType::STRING;
-		//can't set string a to string b if string a is uninitialized
-		new(data) std::string();
-		*(std::string*)&data = *(std::string*)var1.getData() + *(std::string*)var2.getData();
+			break;
+		}
+		
 
 		return Result::SUCCESS;
 	}
 
 	if (var1.getDataType() == DataType::FLOAT and var2.getDataType() == DataType::FLOAT) {
-		type = DataType::FLOAT;
+		
 		switch (operation)
 		{
 		case Operator::ADD:
+			type = DataType::FLOAT;
 			*(double*)&data = *(double*)var1.getData() + *(double*)var2.getData();
 			break;
 		case Operator::SUBTRACT:
+			type = DataType::FLOAT;
 			*(double*)&data = *(double*)var1.getData() - *(double*)var2.getData();
 			break;
 		case Operator::MULTIPLY:
+			type = DataType::FLOAT;
 			*(double*)&data = *(double*)var1.getData() * *(double*)var2.getData();
 			break;
 		case Operator::DIVIDE:
+			type = DataType::FLOAT;
 			*(double*)&data = *(double*)var1.getData() / *(double*)var2.getData();
 			break;
+		case Operator::EQUALS:
+			type = DataType::BOOL;
+			*(bool*)&data = *(double*)var1.getData() == *(double*)var2.getData();
+			break;
+		case Operator::UNEQUALS:
+			type = DataType::BOOL;
+			*(bool*)&data = *(double*)var1.getData() != *(double*)var2.getData();
+			break;
+		default:
+			LulaErrorCreateObject eLula;
+			eLula.errorMessage = std::string("Illegal operation float ") + operationString(operation) + " float.";
+			lulaError = std::move(eLula);
+			return Result::ILLEGALOPERATIONERROR;
+			break;
 		}	
+		return Result::SUCCESS;
+	}
+	if (var1.getDataType() == DataType::BOOL and var2.getDataType() == DataType::BOOL) {
+		
+		switch (operation)
+		{
+		case Operator::EQUALS:
+			type = DataType::BOOL;
+			*(bool*)&data = *(bool*)var1.getData() == *(bool*)var2.getData();
+			break;
+		case Operator::UNEQUALS:
+			type = DataType::BOOL;
+			*(bool*)&data = *(bool*)var1.getData() != *(bool*)var2.getData();
+			break;
+		case Operator::AND:
+			type = DataType::BOOL;
+			*(bool*)&data = *(bool*)var1.getData() and *(bool*)var2.getData();
+			break;
+		case Operator::OR:
+			type = DataType::BOOL;
+			*(bool*)&data = *(bool*)var1.getData() or *(bool*)var2.getData();
+			break;
+		default:
+			LulaErrorCreateObject eLula;
+			eLula.errorMessage = std::string("Illegal operation bool ") + operationString(operation) + " bool.";
+			lulaError = std::move(eLula);
+			return Result::ILLEGALOPERATIONERROR;
+			break;
+		}
 		return Result::SUCCESS;
 	}
 
@@ -82,13 +155,21 @@ Result Variable::constructFromArithmeticOperation(const Variable& var1, const Va
 
 void Variable::becomeCopy(const Variable& copyVar) {
 	type = copyVar.type;
-	if (type == DataType::STRING) {
+	switch (type)
+	{
+	case DataType::FLOAT:
+		*(double*)&data = *(double*)&copyVar.data;
+		break;
+	case DataType::STRING:
 		//can't set string a to string b if string a is uninitialized
 		new(data) std::string();
 		*(std::string*)&data = (*(std::string*)&copyVar.data);
-	}
-	if (type == DataType::FLOAT) {
-		*(double*)&data = *(double*)&copyVar.data;
+		break;
+	case DataType::BOOL:
+		*(bool*)&data = *(bool*)&copyVar.data;
+		break;
+	default:
+		break;
 	}
 }
 
@@ -111,6 +192,9 @@ void print(const Variable& value) {
 		break;
 	case DataType::STRING:
 		std::cout << *(std::string*)value.getData() << "\n";
+		break;
+	case DataType::BOOL:
+		std::cout << boolName(*(bool*)value.getData()) << "\n";
 		break;
 
 	}

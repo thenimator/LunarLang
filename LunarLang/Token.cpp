@@ -13,48 +13,74 @@ Key Token::getKey() const {
 Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	if (size == 0) 
 		return Result::IMPLEMENTATIONERROR;
-	
-	if (size == 1 and pStringToken[0] == '+') {
-		key = Key::OPERATOR;
-		pData = new Operator;
-		*(Operator*)pData = Operator::ADD;
-		return Result::SUCCESS;
+	if (size == 1) {
+		switch (pStringToken[0])
+		{
+		case '+':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::ADD;
+			return Result::SUCCESS;
+			break;
+		case  '-':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::SUBTRACT;
+			return Result::SUCCESS;
+			break;
+		case '*':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::MULTIPLY;
+			return Result::SUCCESS;
+			break;
+		case '/':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::DIVIDE;
+			return Result::SUCCESS;
+			break;
+		case '=':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::ASSIGN;
+			return Result::SUCCESS;
+			break;
+		case '(':
+			key = Key::BRACKET;
+			pData = new Bracket;
+			*(Bracket*)pData = Bracket::OPENING;
+			return Result::SUCCESS;
+			break;
+		case ')':
+			key = Key::BRACKET;
+			pData = new Bracket;
+			*(Bracket*)pData = Bracket::CLOSING;
+			return Result::SUCCESS;
+			break;
+		default:
+			break;
+		}
 	}
-	if (size == 1 and pStringToken[0] == '-') {
-		key = Key::OPERATOR;
-		pData = new Operator;
-		*(Operator*)pData = Operator::SUBTRACT;
-		return Result::SUCCESS;
-	}
-	if (size == 1 and pStringToken[0] == '*') {
-		key = Key::OPERATOR;
-		pData = new Operator;
-		*(Operator*)pData = Operator::MULTIPLY;
-		return Result::SUCCESS;
-	}
-	if (size == 1 and pStringToken[0] == '/') {
-		key = Key::OPERATOR;
-		pData = new Operator;
-		*(Operator*)pData = Operator::DIVIDE;
-		return Result::SUCCESS;
-	}
-	if (size == 1 and pStringToken[0] == '=') {
-		key = Key::OPERATOR;
-		pData = new Operator;
-		*(Operator*)pData = Operator::ASSIGN;
-		return Result::SUCCESS;
-	}
-	if (size == 1 and pStringToken[0] == '(') {
-		key = Key::BRACKET;
-		pData = new Bracket;
-		*(Bracket*)pData = Bracket::OPENING;
-		return Result::SUCCESS;
-	}
-	if (size == 1 and pStringToken[0] == ')') {
-		key = Key::BRACKET;
-		pData = new Bracket;
-		*(Bracket*)pData = Bracket::CLOSING;
-		return Result::SUCCESS;
+	if (size == 2) {
+		if (pStringToken[0] == '!' and pStringToken[1] == '=') {
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::UNEQUALS;
+			return Result::SUCCESS;
+		}
+		if (pStringToken[0] == '=' and pStringToken[1] == '=') {
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::EQUALS;
+			return Result::SUCCESS;
+		}
+		if (strncmp(pStringToken, "or", 2) == 0) {
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::OR;
+			return Result::SUCCESS;
+		}
 	}
 	if (size == 3) {
 		if (pStringToken[0] == 'o' and pStringToken[1] == 'u' and pStringToken[2] == 't') {
@@ -62,6 +88,29 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			pData = new Operator;
 			*(Operator*)pData = Operator::OUTPUT;
 			return Result::SUCCESS;
+		}
+		if (strncmp(pStringToken, "and", 3) == 0) {
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::AND;
+			return Result::SUCCESS;
+		}
+	}
+	if (size == 4) {
+		if (strncmp(pStringToken, "true", 4) == 0) {
+			key = Key::VARIABLE;
+			pData = new Variable;
+			pData = new Variable(true);
+			return Result::SUCCESS;
+		}
+	}
+	if (size == 5) {
+		if (strncmp(pStringToken, "false", 5) == 0) {
+			key = Key::VARIABLE;
+			pData = new Variable;
+			pData = new Variable(false);
+			return Result::SUCCESS;
+
 		}
 	}
 	//Working until this point
