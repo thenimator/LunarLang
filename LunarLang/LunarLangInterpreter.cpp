@@ -12,18 +12,37 @@ Result LunarLangInterpreter::interpret(const char* filename) {
 
     std::fstream file;
     file.open(filename, std::ios::in); 
-    if (file.is_open()) {   
+    if (file.is_open()) { 
+        uint32_t lineNumber = 0;
         std::string line;
         //char* line;
         while (getline(file, line)) { 
+            lineNumber++;
             TokenList tokenList;
             Result result = tokenList.fillFromLine(line);
-            if (result != Result::SUCCESS)
+            if (result != Result::SUCCESS) {
+                LulaErrorCreateObject error;
+                error.errorFilename = filename;
+                error.errorLine = lineNumber;
+                error.errorMessage = lulaError.what();
+                error.errorType = lulaError.type();
+                lulaError = std::move(error);
+
                 return result;
+            }
+                
 
             result = executeTokens(tokenList);
-            if (result != Result::SUCCESS)
+            if (result != Result::SUCCESS) {
+                LulaErrorCreateObject error;
+                error.errorFilename = filename;
+                error.errorLine = lineNumber;
+                error.errorMessage = lulaError.what();
+                error.errorType = lulaError.type();
+                lulaError = std::move(error);
                 return result;
+            }
+                
         }
         file.close(); 
     }

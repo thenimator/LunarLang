@@ -13,6 +13,9 @@ class LulaError {
 public:
 	LulaError();
 	const std::string& what();
+	uint32_t line();
+	ErrorType type();
+	const std::string& file();
 	LulaError& operator=(LulaErrorCreateObject&& data);
 
 private:

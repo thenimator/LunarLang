@@ -95,6 +95,12 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			*(Operator*)pData = Operator::AND;
 			return Result::SUCCESS;
 		}
+		if (strncmp(pStringToken, "xor", 3) == 0) {
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::UNEQUALS;
+			return Result::SUCCESS;
+		}
 	}
 	if (size == 4) {
 		if (strncmp(pStringToken, "true", 4) == 0) {
