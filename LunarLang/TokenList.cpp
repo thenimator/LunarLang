@@ -15,6 +15,19 @@ TokenList::TokenList(const std::vector<Token>& tokens) {
 	}
 }
 
+TokenList::~TokenList() {
+
+	TokenListElement* del = first;
+	TokenListElement* next;
+	while (del != nullptr) {
+		next = first->next;
+		delete del;
+		del = next;
+	}
+	
+
+}
+
 Result TokenList::fillFromLine(std::string line) {
 	const char* cLine = line.data();
 	int tokenStart = 0;

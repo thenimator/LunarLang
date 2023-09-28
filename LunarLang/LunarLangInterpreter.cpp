@@ -103,6 +103,10 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
 
         break;
     case Key::INPUT: {
+        if (tokens.getSize() == 1) {
+            std::string temp;
+            std::getline(std::cin, temp);
+        }
         if (tokens.getSize() != 2) {
             return Result::SYNTAXERROR;
         }
@@ -112,7 +116,7 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
         }
         std::string variableName = *(std::string*)tokens.getCurrentElement().getToken().getData();
         std::string input;
-        std::cin >> input;
+        std::getline(std::cin,input);
         Variable output(input.c_str(),input.size());
         scopeManager.setVariableValue(variableName, output, false);
 

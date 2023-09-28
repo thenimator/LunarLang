@@ -38,7 +38,7 @@ enum class Key {
 	BRACKET,
 
 	EMPTY,
-
+	//Data Type of pData is gonna be Conditional
 	CONDITIONAL,
 
 	INPUT
