@@ -7,6 +7,7 @@ class TokenList
 public:
 	TokenList();
 	TokenList(const std::vector<Token>& tokens);
+	~TokenList();
 	Result fillFromLine(std::string line);
 	//resets current to first after cutting
 	void cutFirst(uint32_t count);
