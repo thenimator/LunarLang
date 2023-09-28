@@ -212,6 +212,9 @@ void Token::destroy() {
 		case Key::BRACKET:
 			delete (Bracket*)pData;
 			break;
+		case Key::CONDITIONAL:
+			delete (Conditional*)pData;
+			break;
 		}
 	}
 }
