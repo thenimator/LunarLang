@@ -2,6 +2,27 @@
 #include "TokenList.h"
 #include "ScopeManagerAccess.h"
 #include "LulaErrorAccess.h"
+
+uint32_t findMatchingCurlyBracketLine(const std::vector<std::string>& lines, uint32_t currentLine) {
+    uint32_t indentation = 1;
+    while (currentLine < lines.size()) {
+        for (uint32_t i = 0; i < lines[currentLine].size(); i++) {
+            if (lines[currentLine][i] == '{') {
+                indentation++;
+            }
+            if (lines[currentLine][i] == '}') {
+                indentation--;
+                if (indentation == 0) {
+                    return currentLine;
+                }
+            }
+
+        }
+        currentLine++;
+    }
+    return 0;
+}
+
 Result LunarLangInterpreter::interpret(const char* filename) {
     LulaErrorCreateObject reset;
     reset.errorLine = 0;
@@ -13,36 +34,42 @@ Result LunarLangInterpreter::interpret(const char* filename) {
     std::fstream file;
     file.open(filename, std::ios::in); 
     if (file.is_open()) { 
-        uint32_t lineNumber = 0;
+        
         std::string line;
-        //char* line;
         while (getline(file, line)) { 
-            lineNumber++;
+            lines.push_back(std::move(line));
+            
+            
+                
+        }
+        currentLine = 0;
+        //tokens are responsible for changing currentline
+        while (currentLine != lines.size()) {
+            line = lines[currentLine];
             TokenList tokenList;
             Result result = tokenList.fillFromLine(line);
             if (result != Result::SUCCESS) {
                 LulaErrorCreateObject error;
                 error.errorFilename = filename;
-                error.errorLine = lineNumber;
+                error.errorLine = currentLine+1;
                 error.errorMessage = lulaError.what();
                 error.errorType = lulaError.type();
                 lulaError = std::move(error);
 
                 return result;
             }
-                
+
 
             result = executeTokens(tokenList);
             if (result != Result::SUCCESS) {
                 LulaErrorCreateObject error;
                 error.errorFilename = filename;
-                error.errorLine = lineNumber;
+                error.errorLine = currentLine;
                 error.errorMessage = lulaError.what();
                 error.errorType = lulaError.type();
                 lulaError = std::move(error);
                 return result;
             }
-                
         }
         file.close(); 
     }
@@ -81,7 +108,7 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
             return result;
 
         scopeManager.setVariableValue(variableName, output, false);
-
+        currentLine++;
            
     }
         break;
@@ -98,6 +125,7 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
         if (result != Result::SUCCESS)
             return result;
         print(output);
+        currentLine++;
     }
         
 
@@ -105,7 +133,10 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
     case Key::INPUT: {
         if (tokens.getSize() == 1) {
             std::string temp;
+            std::cin.ignore();
             std::getline(std::cin, temp);
+            currentLine++;
+            return Result::SUCCESS;
         }
         if (tokens.getSize() != 2) {
             return Result::SYNTAXERROR;
@@ -116,10 +147,112 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
         }
         std::string variableName = *(std::string*)tokens.getCurrentElement().getToken().getData();
         std::string input;
+        std::cin.ignore();
         std::getline(std::cin,input);
         Variable output(input.c_str(),input.size());
         scopeManager.setVariableValue(variableName, output, false);
+        currentLine++;
 
+    }
+        break;
+    case Key::CONDITIONAL: {
+        Conditional cond = *(Conditional*)tokens.getCurrentElement().getToken().getData();
+        tokens.cutFirst(1);
+        TokenListElement* current = tokens.getCurrentElement().next;
+        TokenListElement* last = &tokens.getCurrentElement(); //hack tokens should be changed
+        while (current->next != nullptr) {
+            last = current;
+            current = current->next;
+        }
+        if (current->getToken().getKey() != Key::CURLYBRACKET) {
+            LulaErrorCreateObject createError;
+            createError.errorMessage = "Expected token '{' at end of conditional statement";
+            createError.errorType = ErrorType::SyntaxError;
+            lulaError = std::move(createError);
+            return Result::SYNTAXERROR;
+        }
+        if (*(Bracket*)current->getToken().getData() != Bracket::OPENING) {
+            LulaErrorCreateObject createError;
+            createError.errorMessage = "Unexpected token '}' at end of conditional statement";
+            createError.errorType = ErrorType::SyntaxError;
+            lulaError = std::move(createError);
+            return Result::SYNTAXERROR;
+        }
+        delete current;
+        last->next = nullptr;
+        //the remaining tokens just have to be evaluated
+
+        result = tokens.gainTokenValues(); //this is used very frequently could be moved to it's own function
+        if (result != Result::SUCCESS)
+            return result;
+        Variable output = Variable();
+        Result result = tokens.generateValue(output);
+        if (result != Result::SUCCESS)
+            return result;
+        if (output.getDataType() != DataType::BOOL) {
+            LulaErrorCreateObject createError;
+            createError.errorMessage = "Unexpected data type after conditional statement";
+            createError.errorType = ErrorType::UnexpectedDatatypeError;
+            lulaError = std::move(createError);
+            return Result::ERROR; //add new error type for unexpected data type
+        }
+        if (*(bool*)output.getData()) {
+            if (cond == Conditional::IF) {
+                scopeManager.increaseIndentationLevel();
+            }
+            if (cond == Conditional::WHILE) {
+                scopeManager.increaseIndentationLevel(currentLine);
+            }
+            currentLine++;
+            return Result::SUCCESS;
+        }
+        uint32_t matchingCurlyBracketLine = findMatchingCurlyBracketLine(lines,currentLine+1);
+        if (matchingCurlyBracketLine == 0) {
+            LulaErrorCreateObject createError;
+            createError.errorMessage = "Unmatched bracket";
+            createError.errorType = ErrorType::UnmatchedBracketError;
+            lulaError = std::move(createError);
+            return Result::ERROR; //add new error type for unexpected data type
+        }
+        TokenList checkList;
+        checkList.fillFromLine(lines[matchingCurlyBracketLine]);
+        if (checkList.getSize() != 1) {
+            LulaErrorCreateObject createError;
+            createError.errorMessage = "Unexpected token";
+            createError.errorType = ErrorType::SyntaxError;
+            lulaError = std::move(createError);
+            return Result::ERROR; //add new error type for unexpected data type
+        }
+        if (checkList.getCurrentElement().getToken().getKey() != Key::CURLYBRACKET) {
+            LulaErrorCreateObject createError;
+            createError.errorMessage = "I seriously don't know";
+            createError.errorType = ErrorType::NoError;
+            lulaError = std::move(createError);
+            return Result::ERROR; //add new error type for unexpected data type
+        }
+        if (*(Bracket*)checkList.getCurrentElement().getToken().getData() != Bracket::CLOSING) {
+            LulaErrorCreateObject createError;
+            createError.errorMessage = "I seriously don't know";
+            createError.errorType = ErrorType::NoError;
+            lulaError = std::move(createError);
+            return Result::ERROR; //add new error type for unexpected data type
+        }
+        currentLine = matchingCurlyBracketLine + 1;
+
+
+    }
+        break;
+    case Key::CURLYBRACKET: {
+        if (tokens.getSize() != 1) {
+            return Result::SYNTAXERROR;
+        }
+        uint32_t newLine = scopeManager.lowerIdentationLevel();
+        if (newLine == 0) {
+            currentLine++;
+            return Result::SUCCESS;
+        }
+        currentLine = newLine;
+        return Result::SUCCESS;
     }
         break;
     case Key::FUNCTIONNAME:
@@ -131,6 +264,7 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
         break;
     default:
         return Result::SYNTAXERROR;
+        break;
     }
 
     return Result::SUCCESS;

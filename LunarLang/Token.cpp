@@ -58,6 +58,30 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			*(Bracket*)pData = Bracket::CLOSING;
 			return Result::SUCCESS;
 			break;
+		case '{':
+			key = Key::CURLYBRACKET;
+			pData = new Bracket;
+			*(Bracket*)pData = Bracket::OPENING;
+			return Result::SUCCESS;
+			break;
+		case '}':
+			key = Key::CURLYBRACKET;
+			pData = new Bracket;
+			*(Bracket*)pData = Bracket::CLOSING;
+			return Result::SUCCESS;
+			break;
+		case '<':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::LESSTHAN;
+			return Result::SUCCESS;
+			break;
+		case '>':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::GREATERTHAN;
+			return Result::SUCCESS;
+			break;
 		default:
 			break;
 		}
@@ -83,8 +107,8 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 		}
 		if (strncmp(pStringToken, "if", 2) == 0) {
 			key = Key::CONDITIONAL;
+			pData = new Conditional;
 			*(Conditional*)pData = Conditional::IF;
-			*(Operator*)pData = Operator::OR;
 			return Result::SUCCESS;
 		}
 	}
@@ -119,6 +143,12 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 		if (strncmp(pStringToken, "false", 5) == 0) {
 			key = Key::VARIABLE;
 			pData = new Variable(false);
+			return Result::SUCCESS;
+		}
+		if (strncmp(pStringToken, "while", 5) == 0) {
+			key = Key::CONDITIONAL;
+			pData = new Conditional;
+			*(Conditional*)pData = Conditional::WHILE;
 			return Result::SUCCESS;
 		}
 		if (strncmp(pStringToken, "input", 5) == 0) {
@@ -215,6 +245,9 @@ void Token::destroy() {
 		case Key::CONDITIONAL:
 			delete (Conditional*)pData;
 			break;
+		case Key::CURLYBRACKET:
+			delete (Bracket*)pData;
+			break;
 		}
 	}
 }
@@ -239,6 +272,21 @@ void Token::becomeCopy(const Token& copyToken) {
 	case Key::BRACKET:
 		pData = new Bracket;
 		*(Bracket*)pData = *(Bracket*)copyToken.getData();
+		break;
+	case Key::CONDITIONAL:
+		pData = new Conditional;
+		*(Conditional*)pData = *(Conditional*)copyToken.getData();
+		break;
+	case Key::CURLYBRACKET:
+		pData = new Bracket;
+		*(Bracket*)pData = *(Bracket*)copyToken.getData();
+		break;
+	case Key::INPUT:
+		pData = new Input;
+		*(Input*)pData = *(Input*)copyToken.getData();
+		break;
+	default:
+		std::cout << "YOU MESSED UP WHILE CODING!" << std::endl;
 		break;
 	}
 }

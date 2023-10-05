@@ -27,6 +27,12 @@ OperationType getOperationType(Operator op) {
 	case Operator::OR:
 		return OperationType::OR;
 		break;
+	case Operator::LESSTHAN:
+		return OperationType::COMPARISSON;
+		break;
+	case Operator::GREATERTHAN:
+		return OperationType::COMPARISSON;
+		break;
 	default:
 		break;
 	}

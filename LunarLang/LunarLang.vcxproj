@@ -134,6 +134,7 @@
     <ClCompile Include="defines.cpp" />
     <ClCompile Include="GlobalErrorMessage.cpp" />
     <ClCompile Include="GlobalScopeManager.cpp" />
+    <ClCompile Include="IndentationLevel.cpp" />
     <ClCompile Include="LulaError.cpp" />
     <ClCompile Include="ScopeAccessFrame.cpp" />
     <ClCompile Include="ScopeManager.cpp" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="defines.h" />
+    <ClInclude Include="IndentationLevel.h" />
     <ClInclude Include="LulaError.h" />
     <ClInclude Include="LulaErrorAccess.h" />
     <ClInclude Include="ScopeAccessFrame.h" />

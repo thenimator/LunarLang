@@ -20,7 +20,7 @@ TokenList::~TokenList() {
 	TokenListElement* del = first;
 	TokenListElement* next;
 	while (del != nullptr) {
-		next = first->next;
+		next = del->next;
 		delete del;
 		del = next;
 	}
@@ -314,6 +314,9 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 	if (result != Result::SUCCESS)
 		return result;
 	result = executeOperations(start, pastEnd, OperationType::LINE);
+	if (result != Result::SUCCESS)
+		return result;
+	result = executeOperations(start, pastEnd, OperationType::COMPARISSON);
 	if (result != Result::SUCCESS)
 		return result;
 	result = executeOperations(start, pastEnd, OperationType::EQUALS);
