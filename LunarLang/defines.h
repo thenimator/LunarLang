@@ -5,6 +5,13 @@
 #include <fstream>
 #include <utility>
 
+#ifdef NDEBUG
+#define DEBUG false
+#else
+#define DEBUG true
+#endif 
+
+
 //TODO change cases on all results
 enum class Result {
 	SUCCESS,
@@ -22,7 +29,9 @@ enum class ErrorType {
 	UnknownVariableError,
 	ImplementationError,
 	IllegalOperationError,
-	NoLowerScopeError
+	NoLowerScopeError,
+	UnexpectedDatatypeError,
+	UnmatchedBracketError
 };
 
 enum class Key {
@@ -41,7 +50,9 @@ enum class Key {
 	//Data Type of pData is gonna be Conditional
 	CONDITIONAL,
 
-	INPUT
+	INPUT,
+	//Data type of pData is gonna be Bracket
+	CURLYBRACKET
 
 };
 
@@ -50,7 +61,8 @@ enum class Input {
 };
 
 enum class Conditional {
-	IF
+	IF,
+	WHILE
 };
 
 enum class Bracket {
@@ -68,7 +80,9 @@ enum class Operator {
 	EQUALS,
 	UNEQUALS,
 	AND,
-	OR
+	OR,
+	LESSTHAN,
+	GREATERTHAN
 };
 
 enum class OperationType {
@@ -77,7 +91,8 @@ enum class OperationType {
 	AND,
 	OR,
 	EQUALS,
-	UNEQUALS
+	UNEQUALS,
+	COMPARISSON
 };
 
 OperationType getOperationType(Operator op);

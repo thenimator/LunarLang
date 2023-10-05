@@ -10,6 +10,8 @@ public:
 	Result interpret(const char* filename);
 
 private:
+	std::vector<std::string> lines;
+	uint32_t currentLine;
 	Result executeTokens(TokenList& tokenList);
 };
 

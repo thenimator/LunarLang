@@ -108,6 +108,14 @@ Result Variable::constructFromArithmeticOperation(const Variable& var1, const Va
 			type = DataType::BOOL;
 			*(bool*)&data = *(double*)var1.getData() != *(double*)var2.getData();
 			break;
+		case Operator::LESSTHAN:
+			type = DataType::BOOL;
+			*(bool*)&data = *(double*)var1.getData() < *(double*)var2.getData();
+			break;
+		case Operator::GREATERTHAN:
+			type = DataType::BOOL;
+			*(bool*)&data = *(double*)var1.getData() > *(double*)var2.getData();
+			break;
 		default:
 			LulaErrorCreateObject eLula;
 			eLula.errorMessage = std::string("Illegal operation float ") + operationString(operation) + " float.";
