@@ -33,6 +33,9 @@ OperationType getOperationType(Operator op) {
 	case Operator::GREATERTHAN:
 		return OperationType::COMPARISSON;
 		break;
+	case Operator::MODULO:
+		return OperationType::MODULO;
+		break;
 	default:
 		break;
 	}

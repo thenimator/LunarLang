@@ -116,6 +116,10 @@ Result Variable::constructFromArithmeticOperation(const Variable& var1, const Va
 			type = DataType::BOOL;
 			*(bool*)&data = *(double*)var1.getData() > *(double*)var2.getData();
 			break;
+		case Operator::MODULO:
+			type = DataType::FLOAT;
+			*(double*)&data = fmod(*(double*)var1.getData(),*(double*)var2.getData());
+			break;
 		default:
 			LulaErrorCreateObject eLula;
 			eLula.errorMessage = std::string("Illegal operation float ") + operationString(operation) + " float.";

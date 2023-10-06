@@ -82,7 +82,8 @@ enum class Operator {
 	AND,
 	OR,
 	LESSTHAN,
-	GREATERTHAN
+	GREATERTHAN,
+	MODULO
 };
 
 enum class OperationType {
@@ -92,7 +93,8 @@ enum class OperationType {
 	OR,
 	EQUALS,
 	UNEQUALS,
-	COMPARISSON
+	COMPARISSON,
+	MODULO
 };
 
 OperationType getOperationType(Operator op);

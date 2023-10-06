@@ -34,11 +34,11 @@ Result TokenList::fillFromLine(std::string line) {
 	int i;
 	bool strConstantIsOpen = false;
 	for (i = 0; i < line.size(); i++) {
-		if ((tokenStart == i) and cLine[i] == ' ') {
+		if ((tokenStart == i) and (cLine[i] == ' ' or cLine[i] == '	')) {
 			tokenStart++;
 			continue;
 		}
-		if (cLine[i] == ' ' and !strConstantIsOpen) {
+		if ((cLine[i] == ' ' or cLine[i] == '	') and !strConstantIsOpen) {
 			Token tempToken;
 			Result result = tempToken.generateFromString(cLine+tokenStart, i - tokenStart);
 			if (result != Result::SUCCESS)
@@ -56,7 +56,7 @@ Result TokenList::fillFromLine(std::string line) {
 
 
 	}
-	if (cLine[i-1] != ' ') {
+	if (cLine[i-1] != ' ' or cLine[i] != '	') {
 		Token tempToken;
 		Result result = tempToken.generateFromString(cLine + tokenStart, i - tokenStart);
 		if (result != Result::SUCCESS)
@@ -311,6 +311,9 @@ Result TokenList::calculateValue(TokenListElement* start, TokenListElement* past
 	*/
 
 	result = executeOperations(start, pastEnd, OperationType::POINT);
+	if (result != Result::SUCCESS)
+		return result;
+	result = executeOperations(start, pastEnd, OperationType::MODULO);
 	if (result != Result::SUCCESS)
 		return result;
 	result = executeOperations(start, pastEnd, OperationType::LINE);
