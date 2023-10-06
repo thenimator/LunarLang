@@ -18,8 +18,9 @@ uint32_t ScopeManager::lowerIdentationLevel() {
 	int returnLine = scopes[scopes.size() - 1].lowerIndentationLevel();
 	if (returnLine < 0) {
 		scopes.pop_back();
-		returnLine = -returnLine;
+		return -returnLine;
 	}
+	
 	return returnLine;
 }
 
