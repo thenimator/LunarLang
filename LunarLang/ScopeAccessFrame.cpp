@@ -8,7 +8,9 @@ int ScopeAccessFrame::lowerIndentationLevel() {
 	if (indentations.size() == 1) {
 		return -static_cast<int>(indentations[0].leave());
 	}
-	return indentations[indentations.size() - 1].leave();
+	int returnval = indentations[indentations.size() - 1].leave();
+	indentations.pop_back();
+	return returnval;
 }
 
 bool ScopeAccessFrame::containsVariable(const std::string& variableName) {
