@@ -82,6 +82,13 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			*(Operator*)pData = Operator::GREATERTHAN;
 			return Result::SUCCESS;
 			break;
+		case '%':
+			key = Key::OPERATOR;
+			pData = new Operator;
+			*(Operator*)pData = Operator::MODULO;
+			return Result::SUCCESS;
+			break;
+
 		default:
 			break;
 		}
