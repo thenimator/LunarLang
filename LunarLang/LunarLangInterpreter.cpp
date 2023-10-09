@@ -81,8 +81,11 @@ Result LunarLangInterpreter::interpret(const char* filename) {
 //NOTE: Maybe put this in tokenlist?
 Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
     Result result;
-    if (tokens.getSize() == 0)
+    if (tokens.getSize() == 0) {
+        currentLine++;
         return Result::SUCCESS;
+    }
+        
     tokens.resetPointer();
     switch (tokens.getCurrentElement().getToken().getKey())
     {

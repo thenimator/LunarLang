@@ -33,6 +33,8 @@ Result TokenList::fillFromLine(std::string line) {
 	int tokenStart = 0;
 	int i;
 	bool strConstantIsOpen = false;
+	if (line.size() == 0)
+		return Result::SUCCESS;
 	for (i = 0; i < line.size(); i++) {
 		if ((tokenStart == i) and (cLine[i] == ' ' or cLine[i] == '	')) {
 			tokenStart++;
