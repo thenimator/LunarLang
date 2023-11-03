@@ -2,6 +2,8 @@
 #include "TokenList.h"
 #include "ScopeManagerAccess.h"
 #include "LulaErrorAccess.h"
+#include "FunctionManagerAccess.h"
+#include "Function.h"
 
 uint32_t findMatchingCurlyBracketLine(const std::vector<std::string>& lines, uint32_t currentLine) {
     uint32_t indentation = 1;
@@ -33,46 +35,48 @@ Result LunarLangInterpreter::interpret(const char* filename) {
 
     std::fstream file;
     file.open(filename, std::ios::in); 
-    if (file.is_open()) { 
+    if (!file.is_open())
+        return Result::ERROR; //improve this error
+    
         
-        std::string line;
-        while (getline(file, line)) { 
-            lines.push_back(std::move(line));
+    std::string line;
+    while (getline(file, line)) { 
+        lines.push_back(std::move(line));
             
             
                 
-        }
-        currentLine = 0;
-        //tokens are responsible for changing currentline
-        while (currentLine != lines.size()) {
-            line = lines[currentLine];
-            TokenList tokenList;
-            Result result = tokenList.fillFromLine(line);
-            if (result != Result::SUCCESS) {
-                LulaErrorCreateObject error;
-                error.errorFilename = filename;
-                error.errorLine = currentLine+1;
-                error.errorMessage = lulaError.what();
-                error.errorType = lulaError.type();
-                lulaError = std::move(error);
-
-                return result;
-            }
-
-
-            result = executeTokens(tokenList);
-            if (result != Result::SUCCESS) {
-                LulaErrorCreateObject error;
-                error.errorFilename = filename;
-                error.errorLine = currentLine;
-                error.errorMessage = lulaError.what();
-                error.errorType = lulaError.type();
-                lulaError = std::move(error);
-                return result;
-            }
-        }
-        file.close(); 
     }
+    currentLine = 0;
+    //tokens are responsible for changing currentline
+    while (currentLine != lines.size()) {
+        line = lines[currentLine];
+        TokenList tokenList;
+        Result result = tokenList.fillFromLine(line);
+        if (result != Result::SUCCESS) {
+            LulaErrorCreateObject error;
+            error.errorFilename = filename;
+            error.errorLine = currentLine+1;
+            error.errorMessage = lulaError.what();
+            error.errorType = lulaError.type();
+            lulaError = std::move(error);
+
+            return result;
+        }
+
+
+        result = executeTokens(tokenList);
+        if (result != Result::SUCCESS) {
+            LulaErrorCreateObject error;
+            error.errorFilename = filename;
+            error.errorLine = currentLine;
+            error.errorMessage = lulaError.what();
+            error.errorType = lulaError.type();
+            lulaError = std::move(error);
+            return result;
+        }
+    }
+    file.close(); 
+    
 
     return Result::SUCCESS;
 }
@@ -209,38 +213,7 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
             currentLine++;
             return Result::SUCCESS;
         }
-        uint32_t matchingCurlyBracketLine = findMatchingCurlyBracketLine(lines,currentLine+1);
-        if (matchingCurlyBracketLine == 0) {
-            LulaErrorCreateObject createError;
-            createError.errorMessage = "Unmatched bracket";
-            createError.errorType = ErrorType::UnmatchedBracketError;
-            lulaError = std::move(createError);
-            return Result::ERROR; //add new error type for unexpected data type
-        }
-        TokenList checkList;
-        checkList.fillFromLine(lines[matchingCurlyBracketLine]);
-        if (checkList.getSize() != 1) {
-            LulaErrorCreateObject createError;
-            createError.errorMessage = "Unexpected token";
-            createError.errorType = ErrorType::SyntaxError;
-            lulaError = std::move(createError);
-            return Result::ERROR; //add new error type for unexpected data type
-        }
-        if (checkList.getCurrentElement().getToken().getKey() != Key::CURLYBRACKET) {
-            LulaErrorCreateObject createError;
-            createError.errorMessage = "I seriously don't know";
-            createError.errorType = ErrorType::NoError;
-            lulaError = std::move(createError);
-            return Result::ERROR; //add new error type for unexpected data type
-        }
-        if (*(Bracket*)checkList.getCurrentElement().getToken().getData() != Bracket::CLOSING) {
-            LulaErrorCreateObject createError;
-            createError.errorMessage = "I seriously don't know";
-            createError.errorType = ErrorType::NoError;
-            lulaError = std::move(createError);
-            return Result::ERROR; //add new error type for unexpected data type
-        }
-        currentLine = matchingCurlyBracketLine + 1;
+        gotoEndOfScope();
 
 
     }
@@ -258,6 +231,85 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
         return Result::SUCCESS;
     }
         break;
+        //a function is beginning on this line#
+        //Beginning with a datatypename is actually pretty irellevant
+    case Key::DATATYPENAME: {
+        TokenListElement* next = tokens.getCurrentElement().getNext();
+        if (next->getToken().getKey() != Key::FUNCTIONNAME) {
+            return Result::ERROR; //IMPROVE THIS ERROR -> UnexpectedTokenError
+        }
+        Function function;
+        function.setName(std::move(*(std::string*)next->getToken().getData()));
+        std::vector<DataType> inputs = {};
+        next = next->next;
+        if (next == nullptr) {
+            return Result::SYNTAXERROR;
+        }
+        //in case the function has no parameters
+        if (next->getToken().getKey() == Key::BRACKET) {
+            if (!(*(Bracket*)next->getToken().getData() == Bracket::CLOSING)) {
+                return Result::SYNTAXERROR; //make error better
+            }
+            next = next->next;
+            goto parameterEnd; //program is able to add function without going through parameters
+            
+        }
+
+        parameterReading: {
+            TokenListElement* type = next;
+            TokenListElement* name;
+            TokenListElement* nextIndication;
+            do {
+                name = type->next;
+                if (name == nullptr) {
+                    return Result::SYNTAXERROR;
+                }
+                nextIndication = name->next;
+                if (nextIndication == nullptr) {
+                    return Result::SYNTAXERROR;
+                }
+
+                if (!(type->getToken().getKey() == Key::DATATYPENAME)) {
+                    return Result::SYNTAXERROR;
+                }
+                inputs.push_back(*(DataType*)type->getToken().getData());
+                if (!(name->getToken().getKey() == Key::VARIABLENAME)) {
+                    return Result::SYNTAXERROR;
+                }
+                type = nextIndication->next;
+                
+            } while (nextIndication->getToken().getKey() == Key::SEPARATOR and *(Separator*)nextIndication->getToken().getData() == Separator::COMMA); //defererencing a non-Separator value as Separator is not harmful because Separator is primitive
+            if (!(nextIndication->getToken().getKey() == Key::BRACKET)) {
+                return Result::SYNTAXERROR;
+            }
+            if (!(*(Bracket*)nextIndication->getToken().getData() == Bracket::CLOSING)) {
+                return Result::SYNTAXERROR;
+            }
+            next = nextIndication->next;
+        }
+        
+        
+        
+        parameterEnd:
+        if (next == nullptr) {
+            return Result::SYNTAXERROR;
+        }
+        if (!(next->getToken().getKey() == Key::CURLYBRACKET)) {
+            return Result::SYNTAXERROR;
+        }
+        if (!(*(Bracket*)next->getToken().getData() == Bracket::OPENING)) {
+            return Result::SYNTAXERROR;
+        }
+        if (next->next != nullptr) {
+            return Result::SYNTAXERROR;
+        }
+        function.setInputs(std::move(inputs));
+        functionManager.addfunction(function.toSignature(), { "",currentLine });
+
+
+        gotoEndOfScope();
+    }
+        break;
     case Key::FUNCTIONNAME:
         return Result::IMPLEMENTATIONERROR;
         break;
@@ -271,4 +323,39 @@ Result LunarLangInterpreter::executeTokens(TokenList& tokens) {
     }
 
     return Result::SUCCESS;
+}
+
+Result LunarLangInterpreter::gotoEndOfScope() {
+    uint32_t matchingCurlyBracketLine = findMatchingCurlyBracketLine(lines, currentLine + 1);
+    if (matchingCurlyBracketLine == 0) {
+        LulaErrorCreateObject createError;
+        createError.errorMessage = "Unmatched bracket";
+        createError.errorType = ErrorType::UnmatchedBracketError;
+        lulaError = std::move(createError);
+        return Result::ERROR; //add new error type for unexpected data type
+    }
+    TokenList checkList;
+    checkList.fillFromLine(lines[matchingCurlyBracketLine]);
+    if (checkList.getSize() != 1) {
+        LulaErrorCreateObject createError;
+        createError.errorMessage = "Unexpected token";
+        createError.errorType = ErrorType::SyntaxError;
+        lulaError = std::move(createError);
+        return Result::ERROR; //add new error type for unexpected data type
+    }
+    if (checkList.getCurrentElement().getToken().getKey() != Key::CURLYBRACKET) {
+        LulaErrorCreateObject createError;
+        createError.errorMessage = "I seriously don't know";
+        createError.errorType = ErrorType::NoError;
+        lulaError = std::move(createError);
+        return Result::ERROR; //add new error type for unexpected data type
+    }
+    if (*(Bracket*)checkList.getCurrentElement().getToken().getData() != Bracket::CLOSING) {
+        LulaErrorCreateObject createError;
+        createError.errorMessage = "I seriously don't know";
+        createError.errorType = ErrorType::NoError;
+        lulaError = std::move(createError);
+        return Result::ERROR; //add new error type for unexpected data type
+    }
+    currentLine = matchingCurlyBracketLine + 1;
 }

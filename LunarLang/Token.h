@@ -26,3 +26,4 @@ private:
 bool isVariableName(const char* data, uint32_t size);
 bool isNumber(const char* data, uint32_t size);
 bool isStringConstant(const char* data, uint32_t size);
+bool isFunctionName(const char* data, uint32_t size);

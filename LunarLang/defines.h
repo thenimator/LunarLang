@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <utility>
+#include <unordered_map>
 
 #ifdef NDEBUG
 #define DEBUG false
@@ -52,8 +53,26 @@ enum class Key {
 
 	INPUT,
 	//Data type of pData is gonna be Bracket
-	CURLYBRACKET
+	CURLYBRACKET,
+	//Data type of pData is gonna be DataType
+	DATATYPENAME,
+	//Data type of pData is gonna be Separator
+	SEPARATOR
 
+};
+
+enum class Separator {
+	COMMA
+};
+
+enum class DataType {
+	FLOAT,
+	STRING,
+	BOOL,
+	//deprecated
+	ANY,
+	//deprecated
+	INTEGER,
 };
 
 enum class Input {
@@ -95,6 +114,11 @@ enum class OperationType {
 	UNEQUALS,
 	COMPARISSON,
 	MODULO
+};
+
+struct LineLocation {
+	std::string filename;
+	uint32_t line;
 };
 
 OperationType getOperationType(Operator op);

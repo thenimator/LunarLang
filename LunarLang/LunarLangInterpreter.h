@@ -13,5 +13,6 @@ private:
 	std::vector<std::string> lines;
 	uint32_t currentLine;
 	Result executeTokens(TokenList& tokenList);
+	Result gotoEndOfScope();
 };
 

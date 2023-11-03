@@ -13,7 +13,7 @@ Key Token::getKey() const {
 Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	if (size == 0) 
 		return Result::IMPLEMENTATIONERROR;
-	if (size == 1) {
+	if (size == 1) { //should be changed to a switch statemetn
 		switch (pStringToken[0])
 		{
 		case '+':
@@ -88,6 +88,12 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			*(Operator*)pData = Operator::MODULO;
 			return Result::SUCCESS;
 			break;
+		case ',':
+			key = Key::SEPARATOR;
+			pData = new Separator;
+			*(Separator*)pData = Separator::COMMA;
+			return Result::SUCCESS;
+			break;
 
 		default:
 			break;
@@ -145,6 +151,12 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			pData = new Variable(true);
 			return Result::SUCCESS;
 		}
+		if (strncmp(pStringToken, "bool", 4) == 0) {
+			key = Key::DATATYPENAME;
+			pData = new DataType;
+			*(DataType*)pData = DataType::BOOL;
+			return Result::SUCCESS;
+		}
 	}
 	if (size == 5) {
 		if (strncmp(pStringToken, "false", 5) == 0) {
@@ -162,6 +174,20 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 			key = Key::INPUT;
 			pData = new Input;
 			*(Input*)pData = Input::BASIC;
+			return Result::SUCCESS;
+		}
+		if (strncmp(pStringToken, "float", 5) == 0) {
+			key = Key::DATATYPENAME;
+			pData = new DataType;
+			*(DataType*)pData = DataType::FLOAT;
+			return Result::SUCCESS;
+		}
+	}
+	if (size == 6) {
+		if (strncmp(pStringToken, "string", 6) == 0) {
+			key = Key::DATATYPENAME;
+			pData = new DataType;
+			*(DataType*)pData = DataType::STRING;
 			return Result::SUCCESS;
 		}
 	}
@@ -191,6 +217,11 @@ Result Token::generateFromString(const char* pStringToken, uint32_t size) {
 	if (isVariableName(pStringToken, size)) {
 		key = Key::VARIABLENAME;
 		pData = new std::string(pStringToken, size);
+		return Result::SUCCESS;
+	}
+	if (isFunctionName(pStringToken, size)) {
+		key = Key::FUNCTIONNAME;
+		pData = new std::string(pStringToken, size - 1);
 		return Result::SUCCESS;
 	}
 
@@ -255,6 +286,12 @@ void Token::destroy() {
 		case Key::CURLYBRACKET:
 			delete (Bracket*)pData;
 			break;
+		case Key::DATATYPENAME:
+			delete (DataType*)pData;
+			break;
+		case Key::SEPARATOR:
+			delete (Separator*)pData;
+			break;
 		}
 	}
 }
@@ -291,6 +328,14 @@ void Token::becomeCopy(const Token& copyToken) {
 	case Key::INPUT:
 		pData = new Input;
 		*(Input*)pData = *(Input*)copyToken.getData();
+		break;
+	case Key::DATATYPENAME:
+		pData = new DataType;
+		*(DataType*)pData = *(DataType*)copyToken.getData();
+		break;
+	case Key::SEPARATOR:
+		pData = new Separator;
+		*(Separator*)pData = *(Separator*)copyToken.getData();
 		break;
 	default:
 		std::cout << "YOU MESSED UP WHILE CODING!" << std::endl;
@@ -334,6 +379,11 @@ bool isStringConstant(const char* data, uint32_t size) {
 	return true;
 }
 
+bool isFunctionName(const char* data, uint32_t size) {
+	if (!isVariableName(data, size - 1))
+		return false;
+	return data[size - 1] == '(';
+}
 
 
 

@@ -14,6 +14,7 @@ const Variable& IndentationLevel::getVariableValue(const std::string& variableNa
 
 void IndentationLevel::setVariableValue(const std::string& variableName, const Variable& value) {
     variables[variableName] = value;
+    
 }
 
 uint32_t IndentationLevel::leave() {
